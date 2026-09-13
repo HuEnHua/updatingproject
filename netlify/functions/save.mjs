@@ -12,7 +12,7 @@
 // and confirms the payload without storing it, which is what you want while
 // piloting the interface.
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 const FETCH_TIMEOUT_MS = 28_000;
 const MAX_BODY_BYTES = 2_000_000;
 

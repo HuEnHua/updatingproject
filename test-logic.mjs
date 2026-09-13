@@ -32,6 +32,10 @@ A(X.treatmentByKey('blind_accuracy').identity === 'blind', 'arms are addressable
 // ---- Coordinates ----------------------------------------------------
 const photo = { id: 'x', claude: 'G', gpt: 'b', older: true };
 A(X.cellOf(photo) === 'Gb', 'the cell is the capital-first pair');
+A(X.coordForStage(photo, 'ST', 0) === 'prior' && X.coordForStage(photo, 'TS', 0) === 'prior',
+  'both arrival orders begin with an unaided prior');
+A(X.advisorForStage('ST', 0) === null && X.advisorForStage('TS', 0) === null,
+  'no advisor supplies the prior');
 A(X.coordForStage(photo, 'ST', 1) === 'G', 'first report under ST carries Claude\'s signal');
 A(X.coordForStage(photo, 'TS', 1) === 'b', 'first report under TS carries GPT\'s signal');
 A(X.coordForStage(photo, 'ST', 2) === X.coordForStage(photo, 'TS', 2),
@@ -83,13 +87,25 @@ for (const belief of [0.1, 0.35, 0.5, 0.72, 0.9]) {
 
 // ---- Settlement -----------------------------------------------------
 const bankById = {}; bank.forEach(p => { bankById[p.id] = p; });
-const records = plan.map(p => Object.assign({}, p, { report1: 30, report2: 70 }));
-const paidStage1 = X.settlePayment(records, bankById, { trial: 0, stage: 0.1, win: 0 });
+const records = plan.map(p => Object.assign({}, p, { prior: 10, report1: 30, report2: 70 }));
+const paidPrior = X.settlePayment(records, bankById, { trial: 0, stage: 0.1, win: 0 });
+const paidStage1 = X.settlePayment(records, bankById, { trial: 0, stage: 0.5, win: 0 });
 const paidStage2 = X.settlePayment(records, bankById, { trial: 0, stage: 0.9, win: 0 });
+A(paidPrior.stage === 0 && paidPrior.report === 10, 'the unaided prior can be the report that pays');
 A(paidStage1.stage === 1 && paidStage1.report === 30, 'the first report can be the one that pays');
 A(paidStage2.stage === 2 && paidStage2.report === 70, 'the second report can be the one that pays');
 A(paidStage1.won === true, 'a draw below the win probability pays the prize');
 A(X.settlePayment(records, bankById, { trial: 0, stage: 0.1, win: 0.999 }).prizeHKD === 0, 'a draw above it does not');
+const stageCounts = [0, 0, 0];
+for (let i = 0; i < 300; i++) {
+  const payment = X.settlePayment(records, bankById, { trial: 0, stage: (i + 0.5) / 300, win: 0.5 });
+  stageCounts[payment.stage]++;
+}
+A(stageCounts.every(n => n === 100), 'each of the three reports receives exactly one third of the payment-draw interval');
+let incompleteRejected = false;
+try { X.settlePayment([{ ...records[0], prior: null }], bankById, { trial: 0, stage: 0.5, win: 0 }); }
+catch (_) { incompleteRejected = true; }
+A(incompleteRejected, 'incomplete priors are rejected before settlement');
 
 // ---- Loop consistency, the object the design measures ---------------
 // Build a genuine joint distribution and confirm its induced profile closes the

@@ -1,11 +1,16 @@
-# Design notes — Build 1
+# Design notes — Build 3
 
 ## What the session has to produce
 
 Eight distributions: four single-signal (`G`, `B`, `g`, `b`) and four cell
 (`Gg`, `Gb`, `Bg`, `Bb`). One subject-photograph pair produces one report in a
 single-signal marginal and one in a cell marginal, and no subject ever reveals a
-whole profile — which is why the test is a population statement.
+whole profile — which is why the test is a population statement. Each photograph
+also elicits a prior before either advisor's answer appears.
+
+The sequence is: photograph alone → prior → one advisor → `report1` → both
+advisors → `report2`. A prior is unaided for that photograph; subjects may already
+have seen treatment disclosures and advice on earlier photographs.
 
 ## Randomization
 
@@ -16,7 +21,7 @@ whole profile — which is why the test is a population statement.
 | Which photographs | Drawn per subject from the bank, stratified by cell |
 | Order of arrival | Per photograph, balanced within each cell and across the session |
 | Order of photographs | Shuffled after the plan is built |
-| Payment | One photograph, then one of its two reports |
+| Payment | One photograph uniformly, then one of its three reports uniformly |
 
 Arm balance is enforced inside each cell rather than globally: with five
 photographs per cell the odd one alternates across cells, so a session comes out
@@ -39,17 +44,24 @@ subject who learned outcomes as they went would be updating their beliefs about 
 advisors mid-session, and the eight marginals would no longer describe one
 information structure.
 
-**The first report is not shown during the second.** Off by default, and
-configurable. Re-displaying it turns the second report into an edit of the first.
+**Earlier reports stay visible as advice arrives.** The first update shows the
+prior; the final update shows the prior and the report after one advisor. These
+are read-only and belong only to the current photograph. The slider must still
+be touched for each new report. The initial screen renders no advisor verdicts.
 
 ## What the payment screen has to do
 
-The binarized scoring rule is incentive compatible without assumptions on risk
-preferences, but only if the subject believes the mechanism. Rather than assert
-that, the payment screen hands them the slider and shows both conditional win
-chances moving as they drag. The comprehension check then tests the two cases that
-matter: that a confident wrong answer wins nothing, and that a belief of 70 is best
-reported as 70 rather than rounded out to 100 or pulled in to 50.
+The binarized scoring rule remains `1 - (r - x)^2` for a fixed prize. All three
+reports are equally eligible, so the prior has the same reporting incentive as
+the two updates. Numeric win probabilities and the live scoring demonstration
+are removed from participant screens, including the final payment screen.
+
+The instructions emphasize that the best strategy is to report one's actual
+probability. A collapsed details box explains how the rule balances the two
+possible outcomes and gives a truthful-report example. It is also available
+during each trial. The comprehension check covers reporting before advice,
+random advisor order, equal payment eligibility, truthful reporting, delayed age
+feedback, and the assigned accuracy disclosure.
 
 ## Copy
 

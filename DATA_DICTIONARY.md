@@ -1,4 +1,8 @@
-# Data dictionary — Schema 1
+# Data dictionary — Schema 2
+
+Build 3 adds a photo-specific prior before advice. Stage 0 is the prior, stage 1
+is the report after one advisor, and stage 2 is the report after both advisors.
+The existing `report1` and `report2` fields retain their previous meanings.
 
 One JSON payload per subject. `stage` is `progress` for the autosaves written after
 every milestone and `final` for the completed session; keying on `submissionKey`
@@ -40,11 +44,14 @@ lets a backend overwrite rather than accumulate rows.
 | `cell` | `Gg`, `Gb`, `Bg`, `Bb` — capital-first, so it does not depend on order |
 | `arm` | `ST` (Claude first) or `TS` (GPT first) |
 | `firstAdvisor`, `secondAdvisor` | `claude` / `gpt` |
+| `coord0` | `prior`: the photograph-only report before either advisor's answer |
 | `coord1` | Which single-signal marginal the first report belongs to: `G`, `B`, `g`, `b` |
 | `coord2` | Which cell marginal the second report belongs to; always equals `cell` |
 
-`coord1` and `coord2` are the mapping from a report to its coordinate in the eight
-distributions, precomputed so the analysis does not have to reconstruct it.
+`coord1` and `coord2` map the advice-conditioned reports to the original eight
+distributions. `coord0` identifies the additional unaided prior. Prior here means
+before advice about the current photograph, not before all earlier photographs
+or the session's treatment disclosures.
 
 ## Reports
 
@@ -53,12 +60,18 @@ distributions, precomputed so the analysis does not have to reconstruct it.
 | Field | Meaning |
 | --- | --- |
 | `signal1`, `signal2` | The verdicts as shown, in arrival order |
-| `report1`, `report2` | Percentages, 0–100 |
-| `report1Ms`, `report2Ms` | Milliseconds on each elicitation screen |
-| `report1Moves`, `report2Moves` | Slider input events, so an untouched-then-nudged answer is distinguishable from a deliberated one |
-| `answeredAt` | ISO timestamp of the second report |
+| `prior` | Probability, 0–100, submitted before either advisor's answer |
+| `report1`, `report2` | Probabilities, 0–100, after one advisor and after both advisors |
+| `priorMs`, `report1Ms`, `report2Ms` | Milliseconds on each elicitation screen, starting after the photograph loads |
+| `priorMoves`, `report1Moves`, `report2Moves` | Slider input-event counts for each report |
+| `priorAnsweredAt`, `report1AnsweredAt`, `report2AnsweredAt` | ISO timestamps for the three submissions |
+| `answeredAt` | ISO timestamp of the final report; equal to `report2AnsweredAt` |
 
 `practiceRecords` has the same shape for the two unpaid photographs.
+Each completed main photograph contributes one record with three reports (60
+reports in 20 records per completed subject). The history displayed at stage 1 is
+`prior`; at stage 2 it is `prior` and `report1`. Showing history does not modify
+those saved values.
 
 ## Comprehension
 
@@ -73,10 +86,10 @@ distributions, precomputed so the analysis does not have to reconstruct it.
 | Field | Meaning |
 | --- | --- |
 | `payment.trialIndex`, `payment.photoId` | The photograph drawn |
-| `payment.stage` | 1 or 2 — which of the two reports paid |
+| `payment.stage` | 0 = prior, 1 = after one advisor, 2 = after both advisors; equally likely |
 | `payment.report` | The number that decided it |
 | `payment.older` | The truth for that photograph |
-| `payment.winProbability` | `1 - (r - x)^2` |
+| `payment.winProbability` | `1 - (r - x)^2`; retained for audit, not displayed to participants |
 | `payment.won`, `payment.prizeHKD` | Outcome |
 | `payment.uniforms` | The three draws, so the settlement can be replayed |
 | `showUpFeeHKD`, `prizeHKD` | Terms in force for that session |
@@ -84,4 +97,4 @@ distributions, precomputed so the analysis does not have to reconstruct it.
 ## Timing
 
 `pageTimes` accumulates milliseconds by screen name, with trial screens keyed
-`trial_<index>_stage<1|2>`, so time on instructions is separable from time on task.
+`trial_<index>_stage<0|1|2>`, so time on instructions is separable from time on task.

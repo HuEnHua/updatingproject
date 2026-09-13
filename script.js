@@ -1,8 +1,8 @@
 // =====================================================================
-// Belief-consistency study — build 2: original AgeDB photographs
+// Belief-consistency study — build 4: prior, one advisor, both advisors
 // =====================================================================
-const BUILD = 2;
-const SCHEMA_VERSION = 1;
+const BUILD = 4;
+const SCHEMA_VERSION = 2;
 console.log("Belief study — script.js build", BUILD);
 
 // =====================================================================
@@ -28,8 +28,6 @@ const CONFIG = {
   // ---- Elicitation ----
   sliderStep: 1,
   requireSliderMove: true,       // the slider must be touched before continuing
-  showPayoffPreview: true,       // live "chance of winning" readout under the slider
-  showFirstReportInStage2: false, // set true to re-display the subject's first number
 
   // ---- Advisors ----
   // `marginalAccuracy` is the share of the photographs a subject actually faces
@@ -94,15 +92,16 @@ function treatmentFromUniform(u) {
 
 function cellOf(photo) { return String(photo.claude) + String(photo.gpt); }
 
-// Which of the eight belief coordinates a report lands in. The first report
-// carries one signal only; the second carries the pair, written capital-first
-// so that the cell label does not depend on the order of arrival.
+// Stage 0 is the photo-specific prior, before any advice. Stages 1 and 2 retain
+// the eight advice-conditioned coordinates used by the original design.
 function coordForStage(photo, arm, stage) {
+  if (stage === 0) return "prior";
   const s = String(photo.claude), t = String(photo.gpt);
   if (stage === 2) return s + t;
   return arm === "ST" ? s : t;
 }
 function advisorForStage(arm, stage) {
+  if (stage === 0) return null;
   if (arm === "ST") return stage === 1 ? "claude" : "gpt";
   return stage === 1 ? "gpt" : "claude";
 }
@@ -171,6 +170,7 @@ function buildTrialPlan(bank, quota, rand, opts) {
         arm: arm,
         firstAdvisor: advisorForStage(arm, 1),
         secondAdvisor: advisorForStage(arm, 2),
+        coord0: coordForStage(photo, arm, 0),
         coord1: coordForStage(photo, arm, 1),
         coord2: coordForStage(photo, arm, 2),
       });
@@ -188,15 +188,21 @@ function winProbability(reportPercent, older) {
   return 1 - Math.pow(r - x, 2);
 }
 
-// End-of-session payment: one photograph, then one of its two reports.
+// End-of-session payment: one photograph, then one of its three reports.
+// Stage 0 = prior, stage 1 = one advisor, stage 2 = both advisors.
 function settlePayment(records, bankById, uniforms) {
   if (!records.length) throw new Error("No reports to settle");
+  if (records.some(function (r) {
+    return [r.prior, r.report1, r.report2].some(function (v) {
+      return typeof v !== "number" || !Number.isFinite(v) || v < 0 || v > 100;
+    });
+  })) throw new Error("All three reports must be complete before drawing the payment.");
   const uTrial = Math.min(Math.max(Number(uniforms.trial), 0), 0.999999999999);
   const uStage = Math.min(Math.max(Number(uniforms.stage), 0), 0.999999999999);
   const uWin = Math.min(Math.max(Number(uniforms.win), 0), 0.999999999999);
   const record = records[Math.floor(uTrial * records.length)];
-  const stage = uStage < 0.5 ? 1 : 2;
-  const report = stage === 1 ? record.report1 : record.report2;
+  const stage = Math.floor(uStage * 3);
+  const report = [record.prior, record.report1, record.report2][stage];
   const photo = bankById[record.photoId];
   if (!photo) throw new Error("Unknown photograph " + record.photoId);
   const older = !!photo.older;
@@ -524,6 +530,7 @@ function buildSessionPlans() {
     return {
       index: i + 1, photoId: photo.id, cell: cellOf(photo), arm: arm,
       firstAdvisor: advisorForStage(arm, 1), secondAdvisor: advisorForStage(arm, 2),
+      coord0: coordForStage(photo, arm, 0),
       coord1: coordForStage(photo, arm, 1), coord2: coordForStage(photo, arm, 2),
       practice: true,
     };
@@ -574,13 +581,15 @@ function renderOverview() {
       : "<p>You are not alone in this. Two artificial-intelligence systems were shown the same photograph before the session, " +
         "and each one gave its own answer to the same question. You will see their answers as you go.</p>") +
     "<div class=\"steps\">" +
-    "<div class=\"step\"><span class=\"step-mark\">1</span><div><h3>One answer, then the other</h3>" +
-    "<p>For each photograph you first see one system's answer and give your judgement. Then the second system's answer appears and you give your judgement again.</p></div></div>" +
-    "<div class=\"step\"><span class=\"step-mark\">2</span><div><h3>You always see both</h3>" +
-    "<p>Every photograph has two advisor answers, and you will always be shown both. Which one comes first is decided by a coin flip that has nothing to do with either answer.</p></div></div>" +
-    "<div class=\"step\"><span class=\"step-mark\">3</span><div><h3>No feedback until the end</h3>" +
-    "<p>You will not learn anyone's real age during the session. The true ages are revealed at the very end, when your payment is worked out.</p></div></div>" +
+    "<div class=\"step\"><span class=\"step-mark\">1</span><div><h3>Your own first estimate</h3>" +
+    "<p>Look at the photograph and report your probability before seeing either system's answer.</p></div></div>" +
+    "<div class=\"step\"><span class=\"step-mark\">2</span><div><h3>After one advisor</h3>" +
+    "<p>One system's answer appears. Give your probability again; your initial estimate remains visible.</p></div></div>" +
+    "<div class=\"step\"><span class=\"step-mark\">3</span><div><h3>After both advisors</h3>" +
+    "<p>The second answer appears alongside the first. Give your final probability, with both of your earlier estimates shown for reference.</p></div></div>" +
     "</div>" +
+    "<p>Both advisors' answers are always shown, in a randomly chosen order. Keeping the same probability is fine if it still reflects your belief.</p>" +
+    "<p>No true ages are revealed between photographs. You learn them at the end of the session.</p>" +
     (CONFIG.pilotMode
       ? "<p>The photographs and ages are real AgeDB data. The advisor answers are sample values for testing this interface.</p>"
       : "<p>Everything you see is real. The two systems are real systems, their answers are the answers they actually gave, " +
@@ -682,51 +691,33 @@ $("btn-advisors").addEventListener("click", function () {
 });
 
 // =====================================================================
-// How the payment works, with a live demonstration
+// Explain truthful reporting without displaying scoring-rule probabilities.
 // =====================================================================
-function pct(x) { return Math.round(x * 1000) / 10; }
+function scoringExplanationHtml() {
+  return '<details class="review-box scoring-explanation">' +
+    '<summary>Why is it best to report what I believe?</summary>' +
+    "<p>The selected report is scored against whether the person really is older than " + DESIGN.threshold +
+    ". That score determines the chance of winning the fixed HK$" + CONFIG.prizeHKD + " prize.</p>" +
+    "<p>A higher report helps if the person is older; a lower report helps if the person is younger. " +
+    "The scoring rule balances these possibilities so that, given your belief, your chance of winning is highest " +
+    "when your reported probability matches what you actually believe.</p>" +
+    "<p>For example, if you think there is a 70% chance the person is older, report 70%. " +
+    "Reporting 100% to sound certain or 50% to play safe would give you a lower chance of winning, according to your own belief.</p>" +
+    "<p>Each of your three reports has the same chance of being selected. Use the information you have at each step, " +
+    "and keep the same answer if your belief has not changed.</p></details>";
+}
 
 function renderScoring() {
   const prize = "HK$" + CONFIG.prizeHKD;
   $("scoring-body").innerHTML =
     "<p>You are paid <strong>HK$" + CONFIG.showUpFeeHKD + "</strong> for taking part, whatever you answer.</p>" +
     "<p>On top of that, one single judgement decides a prize of <strong>" + prize + "</strong>. " +
-    "At the end of the session the computer picks one photograph at random, then picks one of your two judgements about it at random. " +
+    "At the end of the session the computer picks one photograph at random, then picks one of your three judgements about it at random. " +
     "That number, and only that number, is what the prize depends on.</p>" +
-    "<p>Your number is a percentage. The closer it is to the truth, the better your chance of winning:</p>" +
-    '<ul class="rule-list">' +
-    "<li>If the person really is older than " + DESIGN.threshold + ", a <strong>higher</strong> number gives you a better chance.</li>" +
-    "<li>If the person really is " + DESIGN.threshold + " or younger, a <strong>lower</strong> number gives you a better chance.</li>" +
-    "</ul>" +
-    "<p>Because you do not know which of the two it will turn out to be, the best you can do is enter the number that " +
-    "<strong>actually matches how likely you think it is</strong>. Rounding to 0 or 100 to look decisive will cost you money if you are wrong, " +
-    "and shading your answer towards the middle to play safe will cost you money if you are right. This holds whether you enjoy a gamble or hate one.</p>" +
-    '<div class="demo" id="scoring-demo">' +
-    "<h3>Try it</h3>" +
-    "<p>Move the slider and watch what it would do to your chance of winning the prize.</p>" +
-    '<label class="demo-label" for="demo-slider">Suppose you enter</label>' +
-    '<div class="slider-shell">' +
-    '<output class="slider-readout" id="demo-readout">50%</output>' +
-    '<input type="range" id="demo-slider" min="0" max="100" step="1" value="50" class="belief-slider">' +
-    '<div class="slider-scale"><span>0 — certainly ' + DESIGN.threshold + ' or younger</span><span>100 — certainly older</span></div>' +
-    "</div>" +
-    '<div class="demo-outcomes">' +
-    '<div class="outcome"><span class="outcome-case">If the person is older than ' + DESIGN.threshold + '</span>' +
-    '<span class="outcome-chance" id="demo-older">—</span><span class="outcome-note">chance of winning ' + prize + "</span></div>" +
-    '<div class="outcome"><span class="outcome-case">If the person is ' + DESIGN.threshold + ' or younger</span>' +
-    '<span class="outcome-chance" id="demo-younger">—</span><span class="outcome-note">chance of winning ' + prize + "</span></div>" +
-    "</div></div>";
-
-  const slider = $("demo-slider");
-  const update = function () {
-    const v = Number(slider.value);
-    $("demo-readout").textContent = v + "%";
-    $("demo-older").textContent = pct(winProbability(v, true)) + "%";
-    $("demo-younger").textContent = pct(winProbability(v, false)) + "%";
-    paintSlider(slider);
-  };
-  slider.addEventListener("input", update);
-  update();
+    "<p>Your initial estimate, your estimate after one advisor, and your estimate after both advisors are all equally eligible.</p>" +
+    '<div class="notice"><strong>Your best strategy is to report the probability you actually believe at each step.</strong> ' +
+    "The payment rule is designed to give you the best chance of winning when you do so. There is no benefit to sounding more certain or less certain than you feel.</div>" +
+    scoringExplanationHtml();
 }
 
 $("btn-scoring").addEventListener("click", function () {
@@ -741,8 +732,8 @@ function renderPracticeIntro() {
   $("practice-intro-body").innerHTML =
     "<p>Two practice photographs come next. They work exactly like the real ones, but nothing about them can win or lose you money, " +
     "and they are not part of the study's data.</p>" +
-    "<p>You will see the photograph, one system's answer, and the slider. After you continue, the second system's answer appears " +
-    "alongside the first and you answer again.</p>";
+    "<p>For each photograph, first give your own probability without advice. Then answer after one advisor, " +
+    "and once more after both advisors. Your earlier estimates remain visible as you receive advice.</p>";
 }
 
 $("btn-practice-intro").addEventListener("click", function () {
@@ -757,11 +748,11 @@ function quizQuestions() {
   const prize = "HK$" + CONFIG.prizeHKD;
   const q = [
     {
-      q: "How many of the two systems' answers will you see for each photograph?",
+      q: "When do you give your first probability for each photograph?",
       options: [
-        "Both of them, always — one first, then the other",
-        "Only the one the computer thinks is more useful",
-        "It depends on what the first one said",
+        "Before seeing either advisor's answer",
+        "After seeing the first advisor's answer",
+        "Only after seeing both advisors' answers",
       ],
       correct: 0,
     },
@@ -775,8 +766,12 @@ function quizQuestions() {
       correct: 0,
     },
     {
-      q: "You enter 100% for a photograph, and that person turns out to be " + DESIGN.threshold + " or younger. What is your chance of winning " + prize + " on that judgement?",
-      options: ["Zero", "Fifty-fifty", "Unchanged — the number does not matter"],
+      q: "Which of your reports can be selected to decide the " + prize + " prize?",
+      options: [
+        "All three, with the same chance — including my initial estimate without advice",
+        "Only my final report after both advisors",
+        "Only the reports that agree with an advisor",
+      ],
       correct: 0,
     },
     {
@@ -822,10 +817,12 @@ let QUIZ = [];
 
 function quizReviewHtml() {
   const order = advisorOrderForDisplay();
-  let html = "<p>Each photograph is shown to you twice: once with one system's answer, then again with both. " +
+  let html = "<p>For each photograph you report three times: before any advice, after one advisor, and after both advisors. " +
+    "Your earlier estimates are shown as you receive more advice. " +
     "Which answer comes first is decided at random for every photograph.</p>" +
-    "<p>At the end, one photograph and one of your two judgements about it are drawn at random. " +
-    "That judgement decides a HK$" + CONFIG.prizeHKD + " prize, and the closer it is to the truth the better your chance.</p>";
+    "<p>At the end, one photograph and one of your three judgements about it are drawn at random. " +
+    "All three are equally eligible. Your best chance of winning the HK$" + CONFIG.prizeHKD +
+    " prize comes from reporting the probability you actually believe at each step.</p>";
   if (accuracyDisclosed()) {
     html += "<p>What you were told about the systems: " +
       order.map(function (k) { return escapeHtml(advisorName(k)) + " is correct on " + accuracyPercent(k) + "% of these photographs"; }).join("; ") +
@@ -899,7 +896,7 @@ $("btn-trials-intro").addEventListener("click", function () {
 // =====================================================================
 let trialPractice = false;
 let trialPos = 0;
-let trialStage = 1;
+let trialStage = 0;
 let trialRecord = null;
 let stageShownAt = 0;
 let sliderMoves = 0;
@@ -908,7 +905,8 @@ let trialImageState = "loading";
 let trialImageRequest = 0;
 
 function trialContinueLabel() {
-  return trialStage === 1 ? "Continue" :
+  if (trialStage === 0) return "Save my estimate and show the first advisor";
+  return trialStage === 1 ? "Save my estimate and show the second advisor" :
     (trialPos + 1 >= activePlan().length ? "Finish" : "Next photograph");
 }
 
@@ -931,7 +929,7 @@ function loadTrialPhoto(photo) {
     if (!img.naturalWidth) { img.onerror(); return; }
     trialImageState = "ready";
     img.hidden = false;
-    $("trial-advisors").hidden = false;
+    $("trial-advisors").hidden = trialStage === 0;
     $("trial-slider").disabled = false;
     $("btn-trial").disabled = false;
     $("btn-trial").textContent = trialContinueLabel();
@@ -971,7 +969,7 @@ function startTrials(practice) {
   trialPos = 0;
   if (trialPractice) state.practiceRecords = [];
   else state.records = [];
-  openStage(1);
+  openStage(0);
 }
 
 function openStage(stage) {
@@ -980,13 +978,14 @@ function openStage(stage) {
   const entry = plan[trialPos];
   const photo = state.bankById[entry.photoId];
   trialStage = stage;
-  if (stage === 1) {
+  if (stage === 0) {
     trialRecord = Object.assign({}, entry, {
       signal1: signalOf(photo, entry.firstAdvisor),
       signal2: signalOf(photo, entry.secondAdvisor),
-      report1: null, report2: null,
-      report1Ms: null, report2Ms: null,
-      report1Moves: 0, report2Moves: 0,
+      prior: null, report1: null, report2: null,
+      priorMs: null, report1Ms: null, report2Ms: null,
+      priorMoves: 0, report1Moves: 0, report2Moves: 0,
+      priorAnsweredAt: null, report1AnsweredAt: null, report2AnsweredAt: null,
     });
   }
   renderTrial();
@@ -999,31 +998,44 @@ function renderTrial() {
   const total = plan.length;
 
   setPage((trialPractice ? "practice_" : "trial_") + entry.index + "_stage" + trialStage);
-  if (!trialPractice) setProgress(8 + trialPos + (trialStage === 2 ? 0.5 : 0));
+  if (!trialPractice) setProgress(8 + trialPos + trialStage / 3);
 
   $("trial-eyebrow").textContent = trialPractice
     ? "Practice photograph " + entry.index + " of " + total
     : "Photograph " + entry.index + " of " + total;
-  $("trial-stagemark").innerHTML = '<span class="stagemark ' + (trialStage === 1 ? "on" : "done") + '">One answer</span>' +
-    '<span class="stagemark-line"></span>' +
-    '<span class="stagemark ' + (trialStage === 2 ? "on" : "") + '">Both answers</span>';
+  $("trial-stagemark").innerHTML = ["No advice", "One advisor", "Both advisors"].map(function (label, stage) {
+    return '<span class="stagemark ' + (trialStage === stage ? "on" : trialStage > stage ? "done" : "") +
+      '"' + (trialStage === stage ? ' aria-current="step"' : "") + '>' + label + "</span>";
+  }).join('<span class="stagemark-line" aria-hidden="true"></span>');
 
-  const cards = [advisorCardHtml(entry.firstAdvisor, { verdict: entry.signal1 })];
+  // Do not even render advice into the DOM until the prior has been submitted.
+  const cards = [];
+  if (trialStage >= 1) cards.push(advisorCardHtml(entry.firstAdvisor, { verdict: entry.signal1 }));
   if (trialStage === 2) cards.push(advisorCardHtml(entry.secondAdvisor, { verdict: entry.signal2 }));
-  else cards.push('<div class="advisor advisor-pending"><p>The second system\'s answer appears after you give this judgement.</p></div>');
+  else if (trialStage === 1) cards.push('<div class="advisor advisor-pending"><p>The second system\'s answer appears after you give this judgement.</p></div>');
   $("trial-advisors").innerHTML = cards.join("");
+  $("trial-grid").classList.toggle("before-advice", trialStage === 0);
 
   $("trial-question").textContent = "How likely is it that this person is older than " + DESIGN.threshold + "?";
-  $("trial-note").textContent = trialStage === 1
-    ? "You have seen one of the two answers."
-    : "You have now seen both answers. Give your judgement again — the same number is a perfectly good answer.";
+  $("trial-note").textContent = [
+    "Give your own estimate from the photograph before seeing any advice.",
+    "You have now seen one advisor's answer. Report what you believe now; keeping your initial estimate is fine.",
+    "You have now seen both answers. Report what you believe now; keeping the same estimate is fine.",
+  ][trialStage];
 
-  if (trialStage === 2 && CONFIG.showFirstReportInStage2 && entry.report1 !== null) {
-    $("trial-prior").hidden = false;
-    $("trial-prior").textContent = "Your answer a moment ago: " + entry.report1 + "%";
-  } else {
-    $("trial-prior").hidden = true;
+  const history = [];
+  if (trialStage >= 1) {
+    history.push('<div class="history-item" data-report="prior"><dt>Before any advice</dt><dd>' + entry.prior + "%</dd></div>");
   }
+  if (trialStage === 2) {
+    history.push('<div class="history-item" data-report="report1"><dt>After ' +
+      escapeHtml(advisorName(entry.firstAdvisor)) + '</dt><dd>' + entry.report1 + "%</dd></div>");
+  }
+  $("trial-history").hidden = history.length === 0;
+  $("trial-history").innerHTML = history.length
+    ? '<h3>Your earlier estimates for this photograph</h3><dl>' + history.join("") + "</dl>"
+    : "";
+  $("trial-scoring-help").innerHTML = scoringExplanationHtml();
 
   const slider = $("trial-slider");
   slider.value = 50;
@@ -1032,17 +1044,9 @@ function renderTrial() {
   sliderTouched = !CONFIG.requireSliderMove;
   $("trial-readout").textContent = sliderTouched ? "50%" : "—";
   $("trial-readout").classList.toggle("untouched", !sliderTouched);
-  $("trial-payoff").hidden = !(CONFIG.showPayoffPreview && sliderTouched);
   $("trial-error").hidden = true;
   showScreen("screen-trial");
   loadTrialPhoto(photo);
-}
-
-function updatePayoff(v) {
-  if (!CONFIG.showPayoffPreview) return;
-  $("trial-payoff").hidden = false;
-  $("payoff-older").textContent = pct(winProbability(v, true)) + "%";
-  $("payoff-younger").textContent = pct(winProbability(v, false)) + "%";
 }
 
 (function wireSlider() {
@@ -1055,7 +1059,6 @@ function updatePayoff(v) {
     $("trial-readout").textContent = v + "%";
     $("trial-readout").classList.remove("untouched");
     paintSlider(slider);
-    updatePayoff(v);
     $("trial-error").hidden = true;
   });
 })();
@@ -1072,17 +1075,16 @@ $("btn-trial").addEventListener("click", function () {
   }
   const value = Number($("trial-slider").value);
   const elapsed = Math.round(performance.now() - stageShownAt);
-  if (trialStage === 1) {
-    trialRecord.report1 = value;
-    trialRecord.report1Ms = elapsed;
-    trialRecord.report1Moves = sliderMoves;
-    openStage(2);
+  const reportKey = ["prior", "report1", "report2"][trialStage];
+  trialRecord[reportKey] = value;
+  trialRecord[reportKey + "Ms"] = elapsed;
+  trialRecord[reportKey + "Moves"] = sliderMoves;
+  trialRecord[reportKey + "AnsweredAt"] = new Date().toISOString();
+  if (trialStage < 2) {
+    openStage(trialStage + 1);
     return;
   }
-  trialRecord.report2 = value;
-  trialRecord.report2Ms = elapsed;
-  trialRecord.report2Moves = sliderMoves;
-  trialRecord.answeredAt = new Date().toISOString();
+  trialRecord.answeredAt = trialRecord.report2AnsweredAt;
   activeRecords().push(trialRecord);
   if (!trialPractice) autosave("photograph_" + trialRecord.index + "_done");
 
@@ -1090,7 +1092,7 @@ $("btn-trial").addEventListener("click", function () {
   const plan = activePlan();
   if (trialPos >= plan.length) { finishTrials(); return; }
   if (!trialPractice && CONFIG.breakAfter && trialPos === CONFIG.breakAfter) { showBreak(); return; }
-  openStage(1);
+  openStage(0);
 });
 
 function showBreak() {
@@ -1100,7 +1102,7 @@ function showBreak() {
     "<p>Take a moment if you want one. Nothing is timed, and the photographs ahead work exactly like the ones behind.</p>";
   showScreen("screen-break");
 }
-$("btn-break").addEventListener("click", function () { openStage(1); });
+$("btn-break").addEventListener("click", function () { openStage(0); });
 
 function finishTrials() {
   if (trialPractice) {
@@ -1250,13 +1252,12 @@ function renderPayment() {
     '<div class="draw-step"><span class="draw-label">The photograph drawn</span>' +
     "<span class=\"draw-value\">Photograph " + p.trialIndex + " of " + state.plan.length + "</span></div>" +
     '<div class="draw-step"><span class="draw-label">The judgement drawn</span>' +
-    "<span class=\"draw-value\">" + (p.stage === 1 ? "Your answer after one system" : "Your answer after both systems") + "</span></div>" +
+    "<span class=\"draw-value\">" + ["Your initial estimate before any advice", "Your answer after one advisor", "Your answer after both advisors"][p.stage] + "</span></div>" +
     '<div class="draw-step"><span class="draw-label">What you entered</span>' +
     '<span class="draw-value">' + p.report + "%</span></div>" +
     '<div class="draw-step"><span class="draw-label">That person\'s real age</span>' +
     '<span class="draw-value">' + escapeHtml(truth + ageLine) + "</span></div>" +
     "</div>" +
-    "<p>Your number gave you a <strong>" + pct(p.winProbability) + "%</strong> chance of winning HK$" + CONFIG.prizeHKD + ".</p>" +
     '<div class="result ' + (p.won ? "result-win" : "result-nowin") + '">' +
     (p.won ? "You won HK$" + CONFIG.prizeHKD : "The draw did not come out in your favour") + "</div>" +
     '<div class="totals"><div><span>Taking part</span><strong>HK$' + CONFIG.showUpFeeHKD + "</strong></div>" +
@@ -1300,7 +1301,7 @@ function renderDebrief() {
     '<div class="table-scroll"><table class="debrief-table"><thead><tr>' +
     "<th>#</th><th>" + escapeHtml(advisorName(advisorOrderForDisplay()[0])) + "</th>" +
     "<th>" + escapeHtml(advisorName(advisorOrderForDisplay()[1])) + "</th>" +
-    "<th>You, after one</th><th>You, after both</th><th>Truth</th></tr></thead><tbody>";
+    "<th>You, before advice</th><th>You, after one</th><th>You, after both</th><th>Truth</th></tr></thead><tbody>";
 
   const order = advisorOrderForDisplay();
   state.records.forEach(function (r) {
@@ -1314,7 +1315,7 @@ function renderDebrief() {
       ? photo.age + (photo.older ? " (older)" : " (younger)")
       : (photo.older ? "Older than " + DESIGN.threshold : DESIGN.threshold + " or younger");
     html += "<tr><td>" + r.index + "</td><td>" + verdictFor(order[0]) + "</td><td>" + verdictFor(order[1]) + "</td>" +
-      "<td>" + r.report1 + "%</td><td>" + r.report2 + "%</td><td>" + escapeHtml(truth) + "</td></tr>";
+      "<td>" + r.prior + "%</td><td>" + r.report1 + "%</td><td>" + r.report2 + "%</td><td>" + escapeHtml(truth) + "</td></tr>";
   });
   html += "</tbody></table></div>";
 

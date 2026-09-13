@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Judging age from photographs — a study</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=4-priors">
 </head>
 <body>
 
@@ -14,6 +14,7 @@
 <main class="wrap">
 
   <aside class="notice pilot-notice" id="pilot-notice" role="note">
+    <p class="version-label">Version 4 · No advice → One advisor → Both advisors</p>
     <strong>Researcher preview.</strong> The AgeDB photographs and recorded ages are real.
     Advisor answers and accuracies are illustrative sample values. This version is for testing the interface.
   </aside>
@@ -23,8 +24,8 @@
     <p class="eyebrow">Before you begin</p>
     <h1>Consent to take part</h1>
     <p>This is an academic study about how people combine advice from more than one source. It runs at the Behavioural Research Laboratory, HKU Business School, and takes about <strong>75 minutes</strong>.</p>
-    <p><strong>What you will do.</strong> You will look at photographs of people and, for each one, say how likely you think it is that the person is older than 21. Two artificial-intelligence systems were shown the same photographs beforehand, and you will see what each of them answered.</p>
-    <p><strong>Payment.</strong> You receive <strong>HK$60</strong> for taking part. One of your judgements is also drawn at random at the end of the session and decides a prize of <strong>HK$200</strong>; the closer that judgement is to the truth, the better your chance of winning it.</p>
+    <p><strong>What you will do.</strong> You will look at photographs of people and, for each one, say how likely you think it is that the person is older than 21. You report first without advice, then after seeing one artificial-intelligence system's answer, and finally after seeing both systems' answers. Your earlier reports remain visible as you receive advice.</p>
+    <p><strong>Payment.</strong> You receive <strong>HK$60</strong> for taking part. One photograph and one of your three judgements about it are drawn at random at the end of the session to decide a prize of <strong>HK$200</strong>. All three judgements are equally eligible. The payment rule gives you the best chance of winning when each report matches the probability you actually believe.</p>
     <p id="consent-answer-status"><strong>No deception.</strong> Nothing in this study is staged. The photographs are of real people whose ages are on record, the two systems are real systems, and the answers you see are the answers they actually gave.</p>
     <p><strong>Risks and voluntariness.</strong> This is a minimal-risk decision study. Taking part is voluntary and you may stop at any point by telling the experimenter; you will still receive the HK$60.</p>
     <p><strong>Your data.</strong> We record your judgements, your response times, and the session and seat you were assigned. We do not record your name or any other identifying information. Data are stored securely and reported in aggregate.</p>
@@ -100,7 +101,7 @@
   <section class="screen screen-wide" id="screen-trial">
     <p class="eyebrow" id="trial-eyebrow"></p>
     <div class="stagemarks" id="trial-stagemark"></div>
-    <div class="trial-grid">
+    <div class="trial-grid" id="trial-grid">
       <figure class="photo-frame">
         <img id="trial-photo" alt="">
       </figure>
@@ -109,7 +110,7 @@
 
     <h2 class="trial-question" id="trial-question"></h2>
     <p class="trial-note" id="trial-note"></p>
-    <p class="trial-prior" id="trial-prior" hidden></p>
+    <section class="answer-history" id="trial-history" aria-label="Your earlier estimates for this photograph" hidden></section>
 
     <div class="slider-shell">
       <output class="slider-readout untouched" id="trial-readout" for="trial-slider">—</output>
@@ -118,11 +119,8 @@
       <div class="slider-scale"><span>0 — certainly 21 or younger</span><span>100 — certainly older</span></div>
     </div>
 
-    <div class="payoff" id="trial-payoff" hidden>
-      <span class="payoff-head">Your chance of winning the prize on this judgement</span>
-      <span class="payoff-pair"><span class="payoff-case">if older than 21</span><strong id="payoff-older">—</strong></span>
-      <span class="payoff-pair"><span class="payoff-case">if 21 or younger</span><strong id="payoff-younger">—</strong></span>
-    </div>
+    <p class="trial-incentive">Report what you actually believe to give yourself the best chance of winning.</p>
+    <div id="trial-scoring-help"></div>
 
     <p class="field-error" id="trial-error" hidden></p>
     <button class="btn-primary" id="btn-trial">Continue</button>
@@ -161,6 +159,6 @@
   </section>
 
 </main>
-<script src="script.js"></script>
+<script src="script.js?v=4-priors"></script>
 </body>
 </html>

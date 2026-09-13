@@ -39,6 +39,10 @@ A(html.includes('type="range"'), 'the belief is elicited on a slider');
 A(html.includes('aria-label="How likely'), 'the slider is labelled for screen readers');
 A(css.includes('prefers-reduced-motion'), 'reduced motion is respected');
 A(css.includes(':focus-visible'), 'keyboard focus is visible');
+A(!html.includes('trial-payoff') && !js.includes('demo-slider') && !js.includes('pct(p.winProbability)'),
+  'scoring-rule probability displays are absent');
+A(html.includes('trial-history') && js.includes('scoringExplanationHtml'),
+  'report history and expandable payment explanation are wired');
 
 // Order and stratification.
 A(js.includes('armsForCells'), 'the two orders are balanced inside each cell');

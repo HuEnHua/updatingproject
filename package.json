@@ -1,8 +1,8 @@
 {
-  "name": "belief-consistency-study-build2-agedb",
+  "name": "belief-consistency-study-build4-agedb-priors",
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --check script.js && node --check netlify/functions/save.mjs && node test-logic.mjs && node test-static.mjs && node test-photos.mjs"
+    "test": "node --check script.js && node --check netlify/functions/save.mjs && node test-logic.mjs && node test-static.mjs && node test-photos.mjs && node test-save.mjs"
   }
 }

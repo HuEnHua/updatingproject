@@ -16,7 +16,7 @@ const A = (cond, msg) => { if (!cond) { console.error('FAIL:', msg); failures++;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
 async function runArm(arm) {
-  const dom = new JSDOM(html.replace('<script src="script.js"></script>', ''), {
+  const dom = new JSDOM(html.replace(/<script src="script\.js[^\"]*"><\/script>/, ''), {
     url: 'https://example.test/index.html?arm=' + arm,
     runScripts: 'outside-only',
     pretendToBeVisual: true,
@@ -29,7 +29,7 @@ async function runArm(arm) {
       return { ok: true, status: 200, json: async () => JSON.parse(manifest) };
     }
     if (options?.body) savedPayloads.push(JSON.parse(options.body));
-    return { ok: true, status: 200, json: async () => ({ status: 'success', schema: 1 }), text: async () => '{"status":"success","schema":1}' };
+    return { ok: true, status: 200, json: async () => ({ status: 'success', schema: 2 }), text: async () => '{"status":"success","schema":2}' };
   };
   window.eval(js + '\nwindow.testBank = () => state.photoBank;');
   const $ = (id) => window.document.getElementById(id);
@@ -60,11 +60,14 @@ async function runArm(arm) {
 
   click('btn-advisors');
   A(active() === 'screen-scoring', arm + ': the payment rule screen opens');
-  const demo = $('demo-slider');
-  demo.value = '80';
-  demo.dispatchEvent(new window.Event('input', { bubbles: true }));
-  A($('demo-older').textContent === '96%' && $('demo-younger').textContent === '36%',
-    arm + ': the payment demonstration computes the scoring rule');
+  const explanation = $('scoring-body').querySelector('details');
+  A(explanation && !explanation.open && /report what I believe/.test(explanation.textContent),
+    arm + ': the payment explanation is expandable and starts closed');
+  A(!$('scoring-body').querySelector('input[type="range"]') && !$('demo-older') && !$('trial-payoff'),
+    arm + ': payment probability displays and the scoring demonstration are removed');
+  A(/probability you actually believe/.test($('scoring-body').textContent) &&
+    /three judgements/.test($('scoring-body').textContent),
+    arm + ': the payment instructions explain truthful reporting for all three judgements');
 
   click('btn-scoring');
   click('btn-practice-intro');
@@ -78,8 +81,9 @@ async function runArm(arm) {
     arm + ': reports are blocked while the photograph is loading');
   A($('trial-advisors').hidden, arm + ': advisor answers wait for the photograph to load');
   click('btn-trial');
-  A($('trial-advisors').textContent.includes('appears after'),
-    arm + ': a premature click cannot reveal the second answer');
+  A($('trial-advisors').children.length === 0 &&
+    $('trial-stagemark').querySelector('[aria-current="step"]').textContent === 'No advice',
+    arm + ': a premature click cannot reveal any advice');
   $('trial-photo').dispatchEvent(new window.Event('error'));
   A($('trial-photo').hidden && $('trial-slider').disabled && !$('trial-error').hidden,
     arm + ': an image error blocks reporting and shows a visible message');
@@ -89,7 +93,8 @@ async function runArm(arm) {
   photoLoaded();
   A(!$('trial-photo').hidden && !$('trial-slider').disabled && !$('btn-trial').disabled,
     arm + ': a successful retry restores the photograph and controls');
-  A(!$('trial-advisors').hidden, arm + ': the photograph and advisor answers appear together');
+  A($('trial-advisors').hidden && $('trial-advisors').children.length === 0,
+    arm + ': loading the photograph alone does not disclose advice');
 
   const answer = (value) => {
     photoLoaded();
@@ -103,11 +108,35 @@ async function runArm(arm) {
   click('btn-trial');
   A(!$('trial-error').hidden, arm + ': an untouched slider is refused');
 
-  // Two practice photographs, two reports each.
+  // Two practice photographs, three reports each; extremes catch falsy-value bugs.
   for (let i = 0; i < 2; i++) {
-    A($('trial-advisors').textContent.includes('appears after'), arm + ': only one answer is shown at first');
+    const prior = i === 0 ? 0 : 100;
+    const imageFile = $('trial-photo').getAttribute('src');
+    A($('trial-advisors').children.length === 0 && $('trial-history').hidden &&
+      $('trial-history').children.length === 0,
+      arm + ': each photograph starts with no advice and no previous-photo history');
+    answer(prior);
+    photoLoaded();
+    A(!$('trial-advisors').hidden && $('trial-advisors').querySelectorAll('.verdict').length === 1,
+      arm + ': exactly one advisor answer is revealed after the prior');
+    A(!$('trial-history').hidden && $('trial-history').querySelectorAll('.history-item').length === 1 &&
+      $('trial-history').querySelector('[data-report="prior"] dd').textContent === prior + '%',
+      arm + ': the initial estimate remains visible, including ' + prior + '%');
+    A($('trial-readout').textContent === '—', arm + ': a new report requires an explicit slider choice');
     answer(40 + i);
-    A(!$('trial-advisors').textContent.includes('appears after'), arm + ': both answers are shown second');
+    photoLoaded();
+    A($('trial-advisors').querySelectorAll('.verdict').length === 2,
+      arm + ': both advisor answers appear after the first updated report');
+    A($('trial-photo').getAttribute('src') === imageFile, arm + ': the same photo is used for all three reports');
+    A($('trial-history').querySelectorAll('.history-item').length === 2 &&
+      $('trial-history').querySelector('[data-report="prior"] dd').textContent === prior + '%' &&
+      $('trial-history').querySelector('[data-report="report1"] dd').textContent === (40 + i) + '%',
+      arm + ': both previous reports are displayed accurately');
+    const firstAdvisorLabel = $('trial-advisors').querySelector('.advisor-name').textContent;
+    A($('trial-history').querySelector('[data-report="report1"] dt').textContent === 'After ' + firstAdvisorLabel,
+      arm + ': the report history names the advisor actually shown first');
+    if (!named) A(!/Claude|ChatGPT|Anthropic|OpenAI/.test($('trial-history').textContent),
+      arm + ': neutral advisor labels are preserved in the report history');
     answer(60 + i);
   }
   A(active() === 'screen-quiz', arm + ': practice hands over to the comprehension check');
@@ -128,16 +157,32 @@ async function runArm(arm) {
   click('btn-trials-intro');
   A(active() === 'screen-trial', arm + ': the paid photographs begin');
   A($('btn-back').disabled, arm + ': there is no going back once they begin');
-
-  let guard = 0;
-  while (active() === 'screen-trial' || active() === 'screen-break') {
-    if (guard++ > 200) break;
-    if (active() === 'screen-break') { click('btn-break'); continue; }
-    answer(20 + (guard % 60));
+  const expected = [];
+  for (let i = 0; i < 20; i++) {
+    if (active() === 'screen-break') click('btn-break');
+    A(active() === 'screen-trial' && $('trial-advisors').children.length === 0 &&
+      $('trial-history').children.length === 0, arm + ': paid photo ' + (i + 1) + ' starts without advice or stale history');
+    const values = { prior: i, report1: 40 + i, report2: 70 + i };
+    expected.push(values);
+    answer(values.prior);
+    answer(values.report1);
+    answer(values.report2);
   }
   await sleep(40);
   A(active() === 'screen-payment', arm + ': the session ends at the payment draw');
   A(/HK\$/.test($('payment-body').textContent), arm + ': the draw states the money');
+  A(!/chance of winning/.test($('payment-body').textContent),
+    arm + ': the payment screen shows the outcome without scoring-rule probabilities');
+  const final = savedPayloads.find(p => p.stage === 'final');
+  A(final?.schema === 2 && final.records.length === 20 && final.practiceRecords.length === 2,
+    arm + ': the full session is exported with the revised schema');
+  A(final.records.every((r, i) => ['prior', 'report1', 'report2'].every(key =>
+    r[key] === expected[i][key] && r[key + 'Ms'] >= 0 && r[key + 'Moves'] === 1 &&
+    typeof r[key + 'AnsweredAt'] === 'string')),
+    arm + ': all 60 paid reports retain their values, response times, input counts, and timestamps');
+  A(final.plan.every(r => r.coord0 === 'prior') && final.payment.report ===
+    final.records[final.payment.trialIndex - 1][['prior', 'report1', 'report2'][final.payment.stage]],
+    arm + ': the payment selects the correct saved report');
 
   click('btn-payment');
   A(active() === 'screen-debrief', arm + ': the debrief follows');
@@ -147,6 +192,11 @@ async function runArm(arm) {
   A(/correct on/i.test(debrief) || withAccuracy, arm + ': the debrief reports the accuracies it had withheld');
   A($('debrief-body').querySelectorAll('.debrief-table tbody tr').length === 20,
     arm + ': every photograph is listed back');
+  A([...$('debrief-body').querySelectorAll('.debrief-table tbody tr')].every((row, i) =>
+    row.children[3].textContent === expected[i].prior + '%' &&
+    row.children[4].textContent === expected[i].report1 + '%' &&
+    row.children[5].textContent === expected[i].report2 + '%'),
+    arm + ': the debrief includes all three reports in their correct columns');
   A([...$('debrief-body').querySelectorAll('.debrief-table tbody tr')].every(row =>
     /\d+ \((?:older|younger)\)/.test(row.textContent)),
     arm + ': the debrief shows numeric recorded ages');
@@ -161,7 +211,7 @@ async function runArm(arm) {
 async function checkRejectedBank(mutate, pattern, participant = false) {
   const changed = JSON.parse(manifest);
   mutate(changed);
-  const dom = new JSDOM(html.replace('<script src="script.js"></script>', ''), {
+  const dom = new JSDOM(html.replace(/<script src="script\.js[^\"]*"><\/script>/, ''), {
     url: 'https://example.test/index.html', runScripts: 'outside-only', pretendToBeVisual: true,
   });
   const { window } = dom;
