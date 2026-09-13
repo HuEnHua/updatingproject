@@ -1,6 +1,18 @@
 # Belief-consistency study — front end
 
-**Build 1 · Schema 1**
+**Build 2 · Schema 1 · AgeDB image integration**
+
+This package includes **104 original AgeDB JPEG photographs**: 100 main-bank
+images and four practice-bank images, with a different dataset identity in every
+slot. Each session still draws 20 main photographs and two practice photographs.
+Every image was matched to the exact recorded age in the supplied pilot manifest.
+
+**The photographs are real; the advisor answers remain illustrative.** No Claude
+or ChatGPT responses were collected for these photographs. The existing sample
+answers and their 72% / 68% rates are retained for interface testing and are
+explicitly labelled throughout the preview. `CONFIG.pilotMode` is `true`, and
+saved payloads identify pilot data. Do not treat this package as a completed
+model pre-screening exercise.
 
 The participant-facing site for the two-advisor belief-elicitation experiment: consent
 through to debrief, the four disclosure arms, a stratified session plan, the binarized
@@ -91,6 +103,8 @@ Everything researcher-editable sits in `CONFIG` at the top of `script.js`.
 
 | Key | Default | Notes |
 | --- | --- | --- |
+| `pilotMode` | true | Shows the preview notice and marks saved data as pilot data |
+| `usePlaceholderFaces` | false | Missing photos block answers and can be retried |
 | `showUpFeeHKD` | 60 | Paid regardless |
 | `prizeHKD` | 200 | One drawn judgement decides it |
 | `cellQuota` | 5 per cell | 20 photographs per session |
@@ -121,10 +135,58 @@ convenience — it belongs in a pilot comparison if you want it.
 together they give the cell. `older` and `age` are used only to settle the prize and
 to write the debrief — no trial screen reads them, and a static test enforces that.
 
-The shipped manifest is sample data for piloting the interface. Replace it with the
-pre-screening output. Images go in `photos/`; when a file is missing the page draws a
-stand-in portrait and logs the missing path, so a session is never stranded by one
-bad file.
+The shipped photographs and ages are actual AgeDB data. `claude` and `gpt` are
+still sample answers from the supplied manifest. Replace those fields with real
+pre-screening output before collecting participant data.
+
+Images are bundled in `photos/` and have neutral filenames (`p001.jpg`, etc.).
+Their original JPEG bytes are preserved: no generated faces, re-encoding,
+retouching, or additional crops. The interface uses `object-fit: contain` to show
+the full image. AgeDB contains public figures and historical photographs; this
+selection has not been screened for recognizability or model difficulty.
+
+The loader now retains `age`, verifies that `older` agrees with `age > 21`, and
+rejects missing ages, duplicate IDs, and invalid advisor codes. Reports remain
+disabled until an image loads. If loading fails, a retry button appears; no
+substitute image is used. Response timing begins after image loading completes.
+Enabling `usePlaceholderFaces` is an explicit interface-demo option only.
+
+### Source and provenance
+
+Source: [AgeDB's official iBUG resource page](https://ibug.doc.ic.ac.uk/resources/agedb/)
+and the original ZIP linked there. All 16,488 image entries in the current archive
+were unencrypted; no password was needed for the selected files.
+
+`provenance/agedb-selection.json` records each experiment ID, original archive
+filename, dataset identity and age, dimensions, SHA-256 checksum, and archive CRC.
+It also records the source link and deterministic selection method. Ages come
+from the dataset filename labels, not estimates from appearance. Selection
+preserved the original age profile, the four agreement-cell counts, and the
+practice/main split. The person shown does not repeat anywhere in the bank.
+
+Please cite: Stylianos Moschoglou, Athanasios Papaioannou, Christos Sagonas,
+Jiankang Deng, Irene Kotsia, and Stefanos Zafeiriou (2017), *AgeDB: the first
+manually collected, in-the-wild age database*, CVPR Workshops.
+[Author-hosted paper](https://ibug.doc.ic.ac.uk/media/uploads/documents/agedb.pdf).
+
+AgeDB is provided for non-commercial research. The official terms restrict
+copying and redistribution of annotations and allow internal copies within one
+organization. Keep this research package internal and consult the linked terms
+before publishing any images or annotations.
+
+### Replacing the illustrative advice
+
+1. Obtain both models' responses to the selected images using the same age
+   question; retain the actual outputs, model versions, prompts, and dates.
+   Do not send age labels or original filenames with the images.
+2. Replace the manifest's `claude` / `gpt` fields with those responses. Rebuild
+   the bank if needed to supply enough photographs in all four cells, while
+   keeping practice and main identities separate.
+3. Recalculate and configure the disclosed accuracies. Keep the main-bank cell
+   proportions aligned with `CONFIG.cellQuota`, since sampling is stratified.
+4. Set `advisorAnswersSource` in `photos.json` to `"model-prescreened"` only once
+   that work is complete, then set `CONFIG.pilotMode` to `false`. The app rejects
+   sample or unspecified advice in participant mode.
 
 **One caveat worth a decision.** `older` ships to the browser, because payment is
 settled in the room at the end of the session. A determined subject could read it out
@@ -140,13 +202,23 @@ npx netlify dev          # or any static server; the save function needs Netlify
 npm test
 ```
 
-`npm test` runs three suites. `test-logic.mjs` exercises the fenced pure logic,
+`npm test` checks JavaScript syntax and runs three suites. `test-logic.mjs` exercises the fenced pure logic,
 including a check that truth-telling maximises the chance of winning at five
 different beliefs and that both worked examples from the proposal satisfy loop
 consistency. `test-static.mjs` checks the wiring between the three runtime files and
-that no unnamed-arm branch leaks a maker's name. `test-session.mjs` walks a complete
+that no unnamed-arm branch leaks a maker's name. `test-photos.mjs` verifies every
+bundled JPEG against its provenance checksum and checks ages and distinct
+identities. `test-session.mjs` walks a complete
 session in jsdom for all four arms; it needs `npm install --no-save jsdom` and is not
 in the default `npm test` for that reason — run it with `node test-session.mjs`.
+That test simulates image events because jsdom does not decode JPEGs; it also
+checks loading, failure, retry, and numeric ages in the debrief.
+
+For a quick local preview, run `python3 -m http.server 8000` in this directory
+and open `http://localhost:8000/index.html`. Opening the HTML directly as a file
+does not support loading the JSON manifest. The default save endpoint needs
+Netlify; set `CONFIG.saveEndpoint` to `""` for a local preview that finishes with
+a downloadable session JSON.
 
 ## Deploying
 

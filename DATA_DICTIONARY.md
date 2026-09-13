@@ -12,6 +12,10 @@ lets a backend overwrite rather than accumulate rows.
 | `sessionCode`, `stationCode` | From `?session=` and `?station=`, if used |
 | `submissionKey` | Stable for the browser session; the natural row key |
 | `schema`, `build` | Format and code version |
+| `pilot` | True for the researcher preview; advisor answers are illustrative |
+| `photoBankMetadata.dataset` | Dataset identifier (`AgeDB` in this package) |
+| `photoBankMetadata.advisorAnswersSource` | `illustrative` in this package; `model-prescreened` only after collecting real responses |
+| `photoBankMetadata.provenanceFile` | Researcher mapping from experiment IDs to original dataset files and checksums |
 | `startedAt`, `finishedAt`, `submittedAt` | ISO timestamps |
 
 ## Treatment

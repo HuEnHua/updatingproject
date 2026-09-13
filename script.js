@@ -1,7 +1,7 @@
 // =====================================================================
-// Belief-consistency study — build 1: two AI advisors, four disclosure arms
+// Belief-consistency study — build 2: original AgeDB photographs
 // =====================================================================
-const BUILD = 1;
+const BUILD = 2;
 const SCHEMA_VERSION = 1;
 console.log("Belief study — script.js build", BUILD);
 
@@ -9,6 +9,7 @@ console.log("Belief study — script.js build", BUILD);
 // CONFIG — researcher-editable settings
 // =====================================================================
 const CONFIG = {
+  pilotMode: true, // Real AgeDB photos, but the supplied advisor answers are illustrative.
   completionMessage: "Please tell the experimenter that you have finished.",
   saveEndpoint: "/.netlify/functions/save",
 
@@ -48,7 +49,7 @@ const CONFIG = {
   blindLabels: ["Advisor 1", "Advisor 2"],
 
   photoManifest: "photos.json",
-  usePlaceholderFaces: true,   // draw a stand-in portrait when an image file is absent
+  usePlaceholderFaces: false,  // enable only for interface demos, never participant sessions
   randomiseOrder: true,
 };
 
@@ -276,6 +277,7 @@ const state = {
   // that "Advisor 1" is not always the same system.
   blindMap: null,
   photoBank: [],
+  photoBankMetadata: null,
   bankById: {},
   plan: [],
   practicePlan: [],
@@ -389,6 +391,10 @@ function beforeUnloadGuard(e) { e.preventDefault(); e.returnValue = ""; }
 })();
 
 const configWarnings = [];
+$("pilot-notice").hidden = !CONFIG.pilotMode;
+if (CONFIG.pilotMode) {
+  $("consent-answer-status").innerHTML = "<strong>Preview data.</strong> The photographs and recorded ages come from AgeDB. The advisor answers in this preview are illustrative; they have not been collected from the two systems for these photographs.";
+}
 (function validateConfig() {
   const total = DESIGN.cells.reduce(function (s, c) { return s + (CONFIG.cellQuota[c] || 0); }, 0);
   if (total < 4) configWarnings.push("cellQuota asks for fewer than four photographs.");
@@ -443,19 +449,43 @@ async function loadPhotoBank() {
   const res = await fetch(CONFIG.photoManifest, { cache: "no-store" });
   if (!res.ok) throw new Error("Could not load " + CONFIG.photoManifest + " (status " + res.status + ")");
   const raw = await res.json();
+  if (!CONFIG.pilotMode && raw.advisorAnswersSource !== "model-prescreened") {
+    throw new Error("This photograph bank still contains sample advisor answers. Collect the model responses before running participant sessions.");
+  }
   const list = Array.isArray(raw) ? raw : raw.photos;
   if (!Array.isArray(list) || !list.length) throw new Error(CONFIG.photoManifest + " contains no photographs.");
+  const seen = new Set();
   const bank = list.map(function (p) {
+    if (!p || typeof p.id !== "string" || !p.id.trim() || seen.has(p.id)) {
+      throw new Error("Every photograph needs a unique, non-empty ID.");
+    }
+    seen.add(p.id);
+    if (!Number.isInteger(p.age) || p.age < 0 || p.age > 130) {
+      throw new Error("Missing or invalid recorded age for photograph " + p.id + ".");
+    }
+    const older = p.age > DESIGN.threshold;
+    if (typeof p.older !== "boolean" || p.older !== older) {
+      throw new Error("The recorded age and older/younger label disagree for photograph " + p.id + ".");
+    }
+    if (!["G", "B"].includes(p.claude) || !["g", "b"].includes(p.gpt)) {
+      throw new Error("Invalid advisor answers for photograph " + p.id + ".");
+    }
     return {
       id: String(p.id),
       file: p.file || ("photos/" + p.id + ".jpg"),
-      older: !!p.older,
-      claude: String(p.claude).toUpperCase() === "B" ? "B" : "G",
-      gpt: String(p.gpt).toLowerCase() === "b" ? "b" : "g",
+      age: p.age,
+      older: older,
+      claude: p.claude,
+      gpt: p.gpt,
       practice: !!p.practice,
     };
   });
   state.photoBank = bank;
+  state.photoBankMetadata = {
+    dataset: raw.dataset || null,
+    advisorAnswersSource: raw.advisorAnswersSource || "unspecified",
+    provenanceFile: raw.provenanceFile || null,
+  };
   state.bankById = {};
   bank.forEach(function (p) { state.bankById[p.id] = p; });
   checkDisclosedAccuracy(bank);
@@ -539,18 +569,22 @@ function renderOverview() {
   $("overview-body").innerHTML =
     "<p>You will look at <strong>" + n + " photographs</strong>, one at a time. For each one, your job is to judge " +
     "<strong>how likely it is that the person in the photograph is older than " + DESIGN.threshold + "</strong>.</p>" +
-    "<p>You are not alone in this. Two artificial-intelligence systems were shown the same photograph before the session, " +
-    "and each one gave its own answer to the same question. You will see their answers as you go.</p>" +
+    (CONFIG.pilotMode
+      ? "<p>For this preview, each photograph has two illustrative advisor answers. You will see these sample answers as you go.</p>"
+      : "<p>You are not alone in this. Two artificial-intelligence systems were shown the same photograph before the session, " +
+        "and each one gave its own answer to the same question. You will see their answers as you go.</p>") +
     "<div class=\"steps\">" +
     "<div class=\"step\"><span class=\"step-mark\">1</span><div><h3>One answer, then the other</h3>" +
     "<p>For each photograph you first see one system's answer and give your judgement. Then the second system's answer appears and you give your judgement again.</p></div></div>" +
     "<div class=\"step\"><span class=\"step-mark\">2</span><div><h3>You always see both</h3>" +
-    "<p>Both systems answered every photograph, and you will always be shown both answers. Which one comes first is decided by a coin flip that has nothing to do with what either of them said.</p></div></div>" +
+    "<p>Every photograph has two advisor answers, and you will always be shown both. Which one comes first is decided by a coin flip that has nothing to do with either answer.</p></div></div>" +
     "<div class=\"step\"><span class=\"step-mark\">3</span><div><h3>No feedback until the end</h3>" +
     "<p>You will not learn anyone's real age during the session. The true ages are revealed at the very end, when your payment is worked out.</p></div></div>" +
     "</div>" +
-    "<p>Everything you see is real. The two systems are real systems, their answers are the answers they actually gave, " +
-    "and the photographs are of real people whose ages are recorded. Nothing in this study is invented or disguised.</p>";
+    (CONFIG.pilotMode
+      ? "<p>The photographs and ages are real AgeDB data. The advisor answers are sample values for testing this interface.</p>"
+      : "<p>Everything you see is real. The two systems are real systems, their answers are the answers they actually gave, " +
+        "and the photographs are of real people whose ages are recorded. Nothing in this study is invented or disguised.</p>");
 }
 
 $("btn-overview").addEventListener("click", function () {
@@ -578,7 +612,8 @@ function advisorCardHtml(key, opts) {
       "%</strong> of the photographs in this study</p>";
   }
   if (verdict) {
-    html += '<p class="advisor-verdict-text">Its answer for this photograph</p>' +
+    html += '<p class="advisor-verdict-text">' +
+      (CONFIG.pilotMode ? "Illustrative answer for this photograph" : "Its answer for this photograph") + "</p>" +
       '<p class="verdict verdict-' + (VERDICT[verdict].older ? "older" : "younger") + '">' +
       escapeHtml(VERDICT[verdict].text) + "</p>";
   }
@@ -590,6 +625,9 @@ function renderAdvisors() {
   const named = state.treatment.identity === "named";
   const withAccuracy = accuracyDisclosed();
   const order = advisorOrderForDisplay();
+  const answerContext = CONFIG.pilotMode
+    ? "For this preview, each photograph has an illustrative answer assigned to each advisor: "
+    : "Each was shown every photograph in this study and asked the same question you are being asked, and each gave one answer: ";
 
   $("advisors-eyebrow").textContent = "Before you start";
   $("advisors-title").textContent = named ? "The two systems advising you" : "The two systems advising you";
@@ -597,12 +635,12 @@ function renderAdvisors() {
   let html = "";
   if (named) {
     html += "<p>The two systems are <strong>Claude</strong>, made by Anthropic, and <strong>ChatGPT</strong>, made by OpenAI. " +
-      "Each was shown every photograph in this study and asked the same question you are being asked, and each gave one answer: " +
+      answerContext +
       "older than " + DESIGN.threshold + ", or " + DESIGN.threshold + " or younger.</p>";
   } else {
     html += "<p>Your advice comes from <strong>two different artificial-intelligence systems</strong>, both of them assistants " +
       "that millions of people use. <strong>We are not telling you which two.</strong> " +
-      "Each was shown every photograph in this study and asked the same question you are being asked, and each gave one answer: " +
+      answerContext +
       "older than " + DESIGN.threshold + ", or " + DESIGN.threshold + " or younger.</p>";
     html += "<p>Throughout the session they keep the same two labels, so " + escapeHtml(CONFIG.blindLabels[0]) +
       " is the same system every time it appears.</p>";
@@ -613,8 +651,10 @@ function renderAdvisors() {
   if (withAccuracy) {
     html += '<div class="disclosure">' +
       "<h3>How often each one is right</h3>" +
-      "<p>Before the session we checked both systems' answers against the recorded ages for every photograph in this study. " +
-      "Here is how often each was correct:</p>" +
+      (CONFIG.pilotMode
+        ? "<p>These preview percentages describe the illustrative answers in the photo bank; they are not measured model performance:</p>"
+        : "<p>Before the session we checked both systems' answers against the recorded ages for every photograph in this study. " +
+          "Here is how often each was correct:</p>") +
       '<table class="accuracy-table"><tbody>' +
       order.map(function (k) {
         return "<tr><th>" + escapeHtml(advisorName(k)) + "</th><td>correct on <strong>" + accuracyPercent(k) +
@@ -864,6 +904,58 @@ let trialRecord = null;
 let stageShownAt = 0;
 let sliderMoves = 0;
 let sliderTouched = false;
+let trialImageState = "loading";
+let trialImageRequest = 0;
+
+function trialContinueLabel() {
+  return trialStage === 1 ? "Continue" :
+    (trialPos + 1 >= activePlan().length ? "Finish" : "Next photograph");
+}
+
+function loadTrialPhoto(photo) {
+  const request = ++trialImageRequest;
+  const img = $("trial-photo");
+  let fallbackAttempted = false;
+  trialImageState = "loading";
+  stageShownAt = 0;
+  img.hidden = true;
+  $("trial-advisors").hidden = true;
+  img.alt = "Photograph of a person, for you to judge";
+  $("trial-slider").disabled = true;
+  $("btn-trial").disabled = true;
+  $("btn-trial").textContent = "Loading photograph…";
+  $("trial-error").hidden = true;
+
+  img.onload = function () {
+    if (request !== trialImageRequest || trialImageState !== "loading") return;
+    if (!img.naturalWidth) { img.onerror(); return; }
+    trialImageState = "ready";
+    img.hidden = false;
+    $("trial-advisors").hidden = false;
+    $("trial-slider").disabled = false;
+    $("btn-trial").disabled = false;
+    $("btn-trial").textContent = trialContinueLabel();
+    // Image transfer time must not count as time spent judging the face.
+    stageShownAt = performance.now();
+  };
+  img.onerror = function () {
+    if (request !== trialImageRequest || trialImageState !== "loading") return;
+    console.error("Could not load photograph: " + photo.file);
+    if (CONFIG.usePlaceholderFaces && !fallbackAttempted) {
+      fallbackAttempted = true;
+      img.alt = "Stand-in drawing for an interface demonstration";
+      img.src = placeholderFace(photo.id);
+      return;
+    }
+    trialImageState = "failed";
+    img.hidden = true;
+    $("trial-error").hidden = false;
+    $("trial-error").textContent = "The photograph could not be loaded. Try again, or tell the experimenter if the problem continues.";
+    $("btn-trial").disabled = false;
+    $("btn-trial").textContent = "Retry photograph";
+  };
+  img.src = photo.file;
+}
 
 function paintSlider(el) {
   const min = Number(el.min || 0), max = Number(el.max || 100);
@@ -916,17 +1008,6 @@ function renderTrial() {
     '<span class="stagemark-line"></span>' +
     '<span class="stagemark ' + (trialStage === 2 ? "on" : "") + '">Both answers</span>';
 
-  const img = $("trial-photo");
-  img.alt = "Photograph of a person, for you to judge";
-  img.onerror = function () {
-    // A missing image would strand a subject mid-session, so a stand-in is drawn
-    // and the problem is left in the console for the experimenter.
-    img.onerror = null;
-    console.error("Missing photograph file: " + photo.file);
-    img.src = placeholderFace(entry.photoId);
-  };
-  img.src = photo.file || placeholderFace(entry.photoId);
-
   const cards = [advisorCardHtml(entry.firstAdvisor, { verdict: entry.signal1 })];
   if (trialStage === 2) cards.push(advisorCardHtml(entry.secondAdvisor, { verdict: entry.signal2 }));
   else cards.push('<div class="advisor advisor-pending"><p>The second system\'s answer appears after you give this judgement.</p></div>');
@@ -953,10 +1034,8 @@ function renderTrial() {
   $("trial-readout").classList.toggle("untouched", !sliderTouched);
   $("trial-payoff").hidden = !(CONFIG.showPayoffPreview && sliderTouched);
   $("trial-error").hidden = true;
-  $("btn-trial").textContent = trialStage === 1 ? "Continue" : (trialPos + 1 >= plan.length ? "Finish" : "Next photograph");
-
-  stageShownAt = performance.now();
   showScreen("screen-trial");
+  loadTrialPhoto(photo);
 }
 
 function updatePayoff(v) {
@@ -969,6 +1048,7 @@ function updatePayoff(v) {
 (function wireSlider() {
   const slider = $("trial-slider");
   slider.addEventListener("input", function () {
+    if (trialImageState !== "ready") return;
     sliderMoves++;
     sliderTouched = true;
     const v = Number(slider.value);
@@ -981,6 +1061,10 @@ function updatePayoff(v) {
 })();
 
 $("btn-trial").addEventListener("click", function () {
+  if (trialImageState !== "ready") {
+    if (trialImageState === "failed") loadTrialPhoto(state.bankById[trialRecord.photoId]);
+    return;
+  }
   if (!sliderTouched) {
     $("trial-error").hidden = false;
     $("trial-error").textContent = "Move the slider to the number you want, even if that number is 50.";
@@ -1042,6 +1126,8 @@ function payload(stage, label) {
     progressLabel: label || "",
     schema: SCHEMA_VERSION,
     build: BUILD,
+    pilot: CONFIG.pilotMode,
+    photoBankMetadata: state.photoBankMetadata,
     subjectId: subjectId,
     sessionCode: sessionCode,
     stationCode: stationCode,
@@ -1157,7 +1243,7 @@ function renderPayment() {
   const photo = state.bankById[p.photoId];
   const total = CONFIG.showUpFeeHKD + p.prizeHKD;
   const truth = p.older ? "older than " + DESIGN.threshold : DESIGN.threshold + " or younger";
-  const ageLine = (photo && photo.age) ? " — " + photo.age + " years old" : "";
+  const ageLine = photo && Number.isInteger(photo.age) ? " — " + photo.age + " years old" : "";
 
   $("payment-body").innerHTML =
     '<div class="draw">' +
@@ -1190,12 +1276,16 @@ function renderDebrief() {
     const first = advisorOrderForDisplay()[0];
     html += '<div class="reveal">' +
       "<h3>Who the two systems were</h3>" +
-      "<p>The advice you saw came from <strong>Claude</strong>, made by Anthropic, and <strong>ChatGPT</strong>, made by OpenAI. " +
+      (CONFIG.pilotMode
+        ? "<p>The advisor labels in this preview represented <strong>Claude</strong>, made by Anthropic, and <strong>ChatGPT</strong>, made by OpenAI. "
+        : "<p>The advice you saw came from <strong>Claude</strong>, made by Anthropic, and <strong>ChatGPT</strong>, made by OpenAI. ") +
       "In your session, " + escapeHtml(CONFIG.blindLabels[0]) + " was <strong>" +
       escapeHtml(CONFIG.advisors[first].realName) + "</strong> and " + escapeHtml(CONFIG.blindLabels[1]) + " was <strong>" +
       escapeHtml(CONFIG.advisors[first === "claude" ? "gpt" : "claude"].realName) + "</strong>.</p>" +
-      "<p>Their answers were always their real answers. We held back which was which because the study compares sessions " +
-      "that were told the names with sessions that were not.</p></div>";
+      (CONFIG.pilotMode
+        ? "<p>The answers in this preview were illustrative sample values, not actual responses from these systems.</p></div>"
+        : "<p>Their answers were always their real answers. We held back which was which because the study compares sessions " +
+          "that were told the names with sessions that were not.</p></div>");
   }
   if (!accuracyDisclosed()) {
     html += '<div class="reveal">' +
@@ -1220,7 +1310,7 @@ function renderDebrief() {
       return '<span class="mini-verdict ' + (VERDICT[v].older ? "mv-older" : "mv-younger") + '">' +
         escapeHtml(VERDICT[v].text) + "</span>";
     };
-    const truth = photo.age
+    const truth = Number.isInteger(photo.age)
       ? photo.age + (photo.older ? " (older)" : " (younger)")
       : (photo.older ? "Older than " + DESIGN.threshold : DESIGN.threshold + " or younger");
     html += "<tr><td>" + r.index + "</td><td>" + verdictFor(order[0]) + "</td><td>" + verdictFor(order[1]) + "</td>" +

@@ -383,11 +383,13 @@ strong { font-weight: 600; }
 .photo-frame img {
   width: 100%;
   aspect-ratio: 5 / 6;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 7px;
   display: block;
 }
+.photo-frame img[hidden] { display: none; }
 .trial-side { display: grid; gap: 12px; align-content: start; }
+.trial-side[hidden] { display: none; }
 .trial-question { font-size: 21px; margin: 0 0 6px; }
 .trial-note { font-size: 15px; color: var(--text-muted); margin-bottom: 14px; }
 .trial-prior {

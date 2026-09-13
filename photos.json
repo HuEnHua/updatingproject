@@ -1,841 +1,844 @@
 {
- "note": "Sample manifest for piloting the interface. Replace with the pre-screening output. `older` and `age` are used only to settle the prize and to write the end-of-session debrief.",
- "photos": [
-  {
-   "id": "p001",
-   "file": "photos/p001.jpg",
-   "age": 38,
-   "older": true,
-   "claude": "G",
-   "gpt": "g",
-   "practice": true
-  },
-  {
-   "id": "p002",
-   "file": "photos/p002.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "G",
-   "gpt": "b",
-   "practice": true
-  },
-  {
-   "id": "p003",
-   "file": "photos/p003.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "g",
-   "practice": true
-  },
-  {
-   "id": "p004",
-   "file": "photos/p004.jpg",
-   "age": 26,
-   "older": true,
-   "claude": "B",
-   "gpt": "b",
-   "practice": true
-  },
-  {
-   "id": "p005",
-   "file": "photos/p005.jpg",
-   "age": 30,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p006",
-   "file": "photos/p006.jpg",
-   "age": 29,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p007",
-   "file": "photos/p007.jpg",
-   "age": 38,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p008",
-   "file": "photos/p008.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p009",
-   "file": "photos/p009.jpg",
-   "age": 36,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p010",
-   "file": "photos/p010.jpg",
-   "age": 26,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p011",
-   "file": "photos/p011.jpg",
-   "age": 39,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p012",
-   "file": "photos/p012.jpg",
-   "age": 38,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p013",
-   "file": "photos/p013.jpg",
-   "age": 24,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p014",
-   "file": "photos/p014.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p015",
-   "file": "photos/p015.jpg",
-   "age": 39,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p016",
-   "file": "photos/p016.jpg",
-   "age": 34,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p017",
-   "file": "photos/p017.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p018",
-   "file": "photos/p018.jpg",
-   "age": 31,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p019",
-   "file": "photos/p019.jpg",
-   "age": 36,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p020",
-   "file": "photos/p020.jpg",
-   "age": 26,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p021",
-   "file": "photos/p021.jpg",
-   "age": 27,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p022",
-   "file": "photos/p022.jpg",
-   "age": 28,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p023",
-   "file": "photos/p023.jpg",
-   "age": 30,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p024",
-   "file": "photos/p024.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p025",
-   "file": "photos/p025.jpg",
-   "age": 22,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p026",
-   "file": "photos/p026.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p027",
-   "file": "photos/p027.jpg",
-   "age": 40,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p028",
-   "file": "photos/p028.jpg",
-   "age": 30,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p029",
-   "file": "photos/p029.jpg",
-   "age": 24,
-   "older": true,
-   "claude": "G",
-   "gpt": "g"
-  },
-  {
-   "id": "p030",
-   "file": "photos/p030.jpg",
-   "age": 19,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p031",
-   "file": "photos/p031.jpg",
-   "age": 34,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p032",
-   "file": "photos/p032.jpg",
-   "age": 20,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p033",
-   "file": "photos/p033.jpg",
-   "age": 17,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p034",
-   "file": "photos/p034.jpg",
-   "age": 31,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p035",
-   "file": "photos/p035.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p036",
-   "file": "photos/p036.jpg",
-   "age": 22,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p037",
-   "file": "photos/p037.jpg",
-   "age": 39,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p038",
-   "file": "photos/p038.jpg",
-   "age": 28,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p039",
-   "file": "photos/p039.jpg",
-   "age": 22,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p040",
-   "file": "photos/p040.jpg",
-   "age": 17,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p041",
-   "file": "photos/p041.jpg",
-   "age": 26,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p042",
-   "file": "photos/p042.jpg",
-   "age": 19,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p043",
-   "file": "photos/p043.jpg",
-   "age": 29,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p044",
-   "file": "photos/p044.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p045",
-   "file": "photos/p045.jpg",
-   "age": 18,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p046",
-   "file": "photos/p046.jpg",
-   "age": 43,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p047",
-   "file": "photos/p047.jpg",
-   "age": 15,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p048",
-   "file": "photos/p048.jpg",
-   "age": 33,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p049",
-   "file": "photos/p049.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p050",
-   "file": "photos/p050.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p051",
-   "file": "photos/p051.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p052",
-   "file": "photos/p052.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p053",
-   "file": "photos/p053.jpg",
-   "age": 17,
-   "older": false,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p054",
-   "file": "photos/p054.jpg",
-   "age": 37,
-   "older": true,
-   "claude": "G",
-   "gpt": "b"
-  },
-  {
-   "id": "p055",
-   "file": "photos/p055.jpg",
-   "age": 29,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p056",
-   "file": "photos/p056.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p057",
-   "file": "photos/p057.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p058",
-   "file": "photos/p058.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p059",
-   "file": "photos/p059.jpg",
-   "age": 31,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p060",
-   "file": "photos/p060.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p061",
-   "file": "photos/p061.jpg",
-   "age": 26,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p062",
-   "file": "photos/p062.jpg",
-   "age": 18,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p063",
-   "file": "photos/p063.jpg",
-   "age": 38,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p064",
-   "file": "photos/p064.jpg",
-   "age": 42,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p065",
-   "file": "photos/p065.jpg",
-   "age": 27,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p066",
-   "file": "photos/p066.jpg",
-   "age": 20,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p067",
-   "file": "photos/p067.jpg",
-   "age": 28,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p068",
-   "file": "photos/p068.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p069",
-   "file": "photos/p069.jpg",
-   "age": 17,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p070",
-   "file": "photos/p070.jpg",
-   "age": 34,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p071",
-   "file": "photos/p071.jpg",
-   "age": 40,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p072",
-   "file": "photos/p072.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p073",
-   "file": "photos/p073.jpg",
-   "age": 41,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p074",
-   "file": "photos/p074.jpg",
-   "age": 20,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p075",
-   "file": "photos/p075.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p076",
-   "file": "photos/p076.jpg",
-   "age": 39,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p077",
-   "file": "photos/p077.jpg",
-   "age": 17,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p078",
-   "file": "photos/p078.jpg",
-   "age": 19,
-   "older": false,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p079",
-   "file": "photos/p079.jpg",
-   "age": 24,
-   "older": true,
-   "claude": "B",
-   "gpt": "g"
-  },
-  {
-   "id": "p080",
-   "file": "photos/p080.jpg",
-   "age": 15,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p081",
-   "file": "photos/p081.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p082",
-   "file": "photos/p082.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p083",
-   "file": "photos/p083.jpg",
-   "age": 15,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p084",
-   "file": "photos/p084.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p085",
-   "file": "photos/p085.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p086",
-   "file": "photos/p086.jpg",
-   "age": 42,
-   "older": true,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p087",
-   "file": "photos/p087.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p088",
-   "file": "photos/p088.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p089",
-   "file": "photos/p089.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p090",
-   "file": "photos/p090.jpg",
-   "age": 20,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p091",
-   "file": "photos/p091.jpg",
-   "age": 40,
-   "older": true,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p092",
-   "file": "photos/p092.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p093",
-   "file": "photos/p093.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p094",
-   "file": "photos/p094.jpg",
-   "age": 15,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p095",
-   "file": "photos/p095.jpg",
-   "age": 14,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p096",
-   "file": "photos/p096.jpg",
-   "age": 21,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p097",
-   "file": "photos/p097.jpg",
-   "age": 19,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p098",
-   "file": "photos/p098.jpg",
-   "age": 19,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p099",
-   "file": "photos/p099.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p100",
-   "file": "photos/p100.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p101",
-   "file": "photos/p101.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p102",
-   "file": "photos/p102.jpg",
-   "age": 18,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p103",
-   "file": "photos/p103.jpg",
-   "age": 16,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  },
-  {
-   "id": "p104",
-   "file": "photos/p104.jpg",
-   "age": 15,
-   "older": false,
-   "claude": "B",
-   "gpt": "b"
-  }
- ]
+  "note": "Actual AgeDB photographs with recorded ages matched exactly to the original pilot manifest. Advisor answers are the original illustrative sample values, NOT outputs obtained from Claude or ChatGPT on these photographs. Researcher preview only.",
+  "photos": [
+    {
+      "id": "p001",
+      "file": "photos/p001.jpg",
+      "age": 38,
+      "older": true,
+      "claude": "G",
+      "gpt": "g",
+      "practice": true
+    },
+    {
+      "id": "p002",
+      "file": "photos/p002.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "G",
+      "gpt": "b",
+      "practice": true
+    },
+    {
+      "id": "p003",
+      "file": "photos/p003.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "g",
+      "practice": true
+    },
+    {
+      "id": "p004",
+      "file": "photos/p004.jpg",
+      "age": 26,
+      "older": true,
+      "claude": "B",
+      "gpt": "b",
+      "practice": true
+    },
+    {
+      "id": "p005",
+      "file": "photos/p005.jpg",
+      "age": 30,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p006",
+      "file": "photos/p006.jpg",
+      "age": 29,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p007",
+      "file": "photos/p007.jpg",
+      "age": 38,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p008",
+      "file": "photos/p008.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p009",
+      "file": "photos/p009.jpg",
+      "age": 36,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p010",
+      "file": "photos/p010.jpg",
+      "age": 26,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p011",
+      "file": "photos/p011.jpg",
+      "age": 39,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p012",
+      "file": "photos/p012.jpg",
+      "age": 38,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p013",
+      "file": "photos/p013.jpg",
+      "age": 24,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p014",
+      "file": "photos/p014.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p015",
+      "file": "photos/p015.jpg",
+      "age": 39,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p016",
+      "file": "photos/p016.jpg",
+      "age": 34,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p017",
+      "file": "photos/p017.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p018",
+      "file": "photos/p018.jpg",
+      "age": 31,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p019",
+      "file": "photos/p019.jpg",
+      "age": 36,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p020",
+      "file": "photos/p020.jpg",
+      "age": 26,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p021",
+      "file": "photos/p021.jpg",
+      "age": 27,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p022",
+      "file": "photos/p022.jpg",
+      "age": 28,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p023",
+      "file": "photos/p023.jpg",
+      "age": 30,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p024",
+      "file": "photos/p024.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p025",
+      "file": "photos/p025.jpg",
+      "age": 22,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p026",
+      "file": "photos/p026.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p027",
+      "file": "photos/p027.jpg",
+      "age": 40,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p028",
+      "file": "photos/p028.jpg",
+      "age": 30,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p029",
+      "file": "photos/p029.jpg",
+      "age": 24,
+      "older": true,
+      "claude": "G",
+      "gpt": "g"
+    },
+    {
+      "id": "p030",
+      "file": "photos/p030.jpg",
+      "age": 19,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p031",
+      "file": "photos/p031.jpg",
+      "age": 34,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p032",
+      "file": "photos/p032.jpg",
+      "age": 20,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p033",
+      "file": "photos/p033.jpg",
+      "age": 17,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p034",
+      "file": "photos/p034.jpg",
+      "age": 31,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p035",
+      "file": "photos/p035.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p036",
+      "file": "photos/p036.jpg",
+      "age": 22,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p037",
+      "file": "photos/p037.jpg",
+      "age": 39,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p038",
+      "file": "photos/p038.jpg",
+      "age": 28,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p039",
+      "file": "photos/p039.jpg",
+      "age": 22,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p040",
+      "file": "photos/p040.jpg",
+      "age": 17,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p041",
+      "file": "photos/p041.jpg",
+      "age": 26,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p042",
+      "file": "photos/p042.jpg",
+      "age": 19,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p043",
+      "file": "photos/p043.jpg",
+      "age": 29,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p044",
+      "file": "photos/p044.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p045",
+      "file": "photos/p045.jpg",
+      "age": 18,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p046",
+      "file": "photos/p046.jpg",
+      "age": 43,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p047",
+      "file": "photos/p047.jpg",
+      "age": 15,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p048",
+      "file": "photos/p048.jpg",
+      "age": 33,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p049",
+      "file": "photos/p049.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p050",
+      "file": "photos/p050.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p051",
+      "file": "photos/p051.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p052",
+      "file": "photos/p052.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p053",
+      "file": "photos/p053.jpg",
+      "age": 17,
+      "older": false,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p054",
+      "file": "photos/p054.jpg",
+      "age": 37,
+      "older": true,
+      "claude": "G",
+      "gpt": "b"
+    },
+    {
+      "id": "p055",
+      "file": "photos/p055.jpg",
+      "age": 29,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p056",
+      "file": "photos/p056.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p057",
+      "file": "photos/p057.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p058",
+      "file": "photos/p058.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p059",
+      "file": "photos/p059.jpg",
+      "age": 31,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p060",
+      "file": "photos/p060.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p061",
+      "file": "photos/p061.jpg",
+      "age": 26,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p062",
+      "file": "photos/p062.jpg",
+      "age": 18,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p063",
+      "file": "photos/p063.jpg",
+      "age": 38,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p064",
+      "file": "photos/p064.jpg",
+      "age": 42,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p065",
+      "file": "photos/p065.jpg",
+      "age": 27,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p066",
+      "file": "photos/p066.jpg",
+      "age": 20,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p067",
+      "file": "photos/p067.jpg",
+      "age": 28,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p068",
+      "file": "photos/p068.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p069",
+      "file": "photos/p069.jpg",
+      "age": 17,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p070",
+      "file": "photos/p070.jpg",
+      "age": 34,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p071",
+      "file": "photos/p071.jpg",
+      "age": 40,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p072",
+      "file": "photos/p072.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p073",
+      "file": "photos/p073.jpg",
+      "age": 41,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p074",
+      "file": "photos/p074.jpg",
+      "age": 20,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p075",
+      "file": "photos/p075.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p076",
+      "file": "photos/p076.jpg",
+      "age": 39,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p077",
+      "file": "photos/p077.jpg",
+      "age": 17,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p078",
+      "file": "photos/p078.jpg",
+      "age": 19,
+      "older": false,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p079",
+      "file": "photos/p079.jpg",
+      "age": 24,
+      "older": true,
+      "claude": "B",
+      "gpt": "g"
+    },
+    {
+      "id": "p080",
+      "file": "photos/p080.jpg",
+      "age": 15,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p081",
+      "file": "photos/p081.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p082",
+      "file": "photos/p082.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p083",
+      "file": "photos/p083.jpg",
+      "age": 15,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p084",
+      "file": "photos/p084.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p085",
+      "file": "photos/p085.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p086",
+      "file": "photos/p086.jpg",
+      "age": 42,
+      "older": true,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p087",
+      "file": "photos/p087.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p088",
+      "file": "photos/p088.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p089",
+      "file": "photos/p089.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p090",
+      "file": "photos/p090.jpg",
+      "age": 20,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p091",
+      "file": "photos/p091.jpg",
+      "age": 40,
+      "older": true,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p092",
+      "file": "photos/p092.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p093",
+      "file": "photos/p093.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p094",
+      "file": "photos/p094.jpg",
+      "age": 15,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p095",
+      "file": "photos/p095.jpg",
+      "age": 14,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p096",
+      "file": "photos/p096.jpg",
+      "age": 21,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p097",
+      "file": "photos/p097.jpg",
+      "age": 19,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p098",
+      "file": "photos/p098.jpg",
+      "age": 19,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p099",
+      "file": "photos/p099.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p100",
+      "file": "photos/p100.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p101",
+      "file": "photos/p101.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p102",
+      "file": "photos/p102.jpg",
+      "age": 18,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p103",
+      "file": "photos/p103.jpg",
+      "age": 16,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    },
+    {
+      "id": "p104",
+      "file": "photos/p104.jpg",
+      "age": 15,
+      "older": false,
+      "claude": "B",
+      "gpt": "b"
+    }
+  ],
+  "dataset": "AgeDB",
+  "advisorAnswersSource": "illustrative",
+  "provenanceFile": "provenance/agedb-selection.json"
 }

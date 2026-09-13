@@ -22,14 +22,16 @@ async function runArm(arm) {
     pretendToBeVisual: true,
   });
   const { window } = dom;
+  const savedPayloads = [];
   window.scrollTo = () => {};
-  window.fetch = async (url) => {
+  window.fetch = async (url, options) => {
     if (String(url).includes('photos.json')) {
       return { ok: true, status: 200, json: async () => JSON.parse(manifest) };
     }
+    if (options?.body) savedPayloads.push(JSON.parse(options.body));
     return { ok: true, status: 200, json: async () => ({ status: 'success', schema: 1 }), text: async () => '{"status":"success","schema":1}' };
   };
-  window.eval(js);
+  window.eval(js + '\nwindow.testBank = () => state.photoBank;');
   const $ = (id) => window.document.getElementById(id);
   const click = (id) => $(id).dispatchEvent(new window.Event('click', { bubbles: true }));
   const active = () => window.document.querySelector('.screen.active').id;
@@ -40,6 +42,8 @@ async function runArm(arm) {
   click('btn-welcome');
   await sleep(30);
   A(active() === 'screen-overview', arm + ': the photograph bank loads and the overview opens');
+  A(window.testBank().every(p => Number.isInteger(p.age) && p.older === (p.age > 21)),
+    arm + ': recorded ages survive loading and agree with the payment labels');
 
   click('btn-overview');
   A(active() === 'screen-advisors', arm + ': the advisor screen opens');
@@ -66,7 +70,29 @@ async function runArm(arm) {
   click('btn-practice-intro');
   A(active() === 'screen-trial', arm + ': practice begins');
 
+  // jsdom does not fetch/decode images: explicitly simulate browser events.
+  // The separately verified real files are checked by test-photos.mjs.
+  Object.defineProperty($('trial-photo'), 'naturalWidth', { configurable: true, value: 240 });
+  const photoLoaded = () => $('trial-photo').dispatchEvent(new window.Event('load'));
+  A($('trial-slider').disabled && $('btn-trial').disabled,
+    arm + ': reports are blocked while the photograph is loading');
+  A($('trial-advisors').hidden, arm + ': advisor answers wait for the photograph to load');
+  click('btn-trial');
+  A($('trial-advisors').textContent.includes('appears after'),
+    arm + ': a premature click cannot reveal the second answer');
+  $('trial-photo').dispatchEvent(new window.Event('error'));
+  A($('trial-photo').hidden && $('trial-slider').disabled && !$('trial-error').hidden,
+    arm + ': an image error blocks reporting and shows a visible message');
+  A(!$('trial-photo').src.startsWith('data:'), arm + ': image failure does not substitute a drawing');
+  A($('btn-trial').textContent === 'Retry photograph', arm + ': a failed image can be retried');
+  click('btn-trial');
+  photoLoaded();
+  A(!$('trial-photo').hidden && !$('trial-slider').disabled && !$('btn-trial').disabled,
+    arm + ': a successful retry restores the photograph and controls');
+  A(!$('trial-advisors').hidden, arm + ': the photograph and advisor answers appear together');
+
   const answer = (value) => {
+    photoLoaded();
     const s = $('trial-slider');
     s.value = String(value);
     s.dispatchEvent(new window.Event('input', { bubbles: true }));
@@ -121,12 +147,45 @@ async function runArm(arm) {
   A(/correct on/i.test(debrief) || withAccuracy, arm + ': the debrief reports the accuracies it had withheld');
   A($('debrief-body').querySelectorAll('.debrief-table tbody tr').length === 20,
     arm + ': every photograph is listed back');
+  A([...$('debrief-body').querySelectorAll('.debrief-table tbody tr')].every(row =>
+    /\d+ \((?:older|younger)\)/.test(row.textContent)),
+    arm + ': the debrief shows numeric recorded ages');
+  A(savedPayloads.length > 0 && savedPayloads.every(p =>
+    p.pilot === true && p.photoBankMetadata?.dataset === 'AgeDB' &&
+    p.photoBankMetadata?.advisorAnswersSource === 'illustrative'),
+    arm + ': saved data identifies real AgeDB photos and illustrative pilot advice');
+  dom.window.close();
   console.log('');
+}
+
+async function checkRejectedBank(mutate, pattern, participant = false) {
+  const changed = JSON.parse(manifest);
+  mutate(changed);
+  const dom = new JSDOM(html.replace('<script src="script.js"></script>', ''), {
+    url: 'https://example.test/index.html', runScripts: 'outside-only', pretendToBeVisual: true,
+  });
+  const { window } = dom;
+  window.scrollTo = () => {};
+  window.fetch = async () => ({ ok: true, status: 200, json: async () => changed });
+  window.eval(participant ? js.replace('pilotMode: true,', 'pilotMode: false,') : js);
+  const $ = id => window.document.getElementById(id);
+  $('btn-consent').click();
+  $('subject-input').value = 'TEST';
+  $('btn-welcome').click();
+  await sleep(30);
+  A(window.document.querySelector('.screen.active').id === 'screen-welcome' &&
+    !$('subject-error').hidden && pattern.test($('subject-error').textContent),
+    'invalid bank is rejected: ' + pattern);
+  dom.window.close();
 }
 
 for (const arm of ['named_plain', 'blind_plain', 'blind_accuracy', 'named_accuracy']) {
   await runArm(arm);
 }
+await checkRejectedBank(m => { m.photos[0].older = !m.photos[0].older; }, /age and older\/younger label disagree/);
+await checkRejectedBank(m => { delete m.photos[0].age; }, /invalid recorded age/);
+await checkRejectedBank(m => { m.photos[1].id = m.photos[0].id; }, /unique, non-empty ID/);
+await checkRejectedBank(() => {}, /sample advisor answers/, true);
 
 console.log(failures ? `${failures} FAILURES` : 'SESSION WALKTHROUGH PASSES');
 process.exit(failures ? 1 : 0);
