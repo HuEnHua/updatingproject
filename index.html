@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Judging age from photographs — a study</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+<button type="button" id="btn-back" class="btn-back" aria-label="Go back">← Back</button>
+
+<main class="wrap">
+
+  <section class="screen active" id="screen-consent">
+    <div class="notice" id="config-warning" hidden></div>
+    <p class="eyebrow">Before you begin</p>
+    <h1>Consent to take part</h1>
+    <p>This is an academic study about how people combine advice from more than one source. It runs at the Behavioural Research Laboratory, HKU Business School, and takes about <strong>75 minutes</strong>.</p>
+    <p><strong>What you will do.</strong> You will look at photographs of people and, for each one, say how likely you think it is that the person is older than 21. Two artificial-intelligence systems were shown the same photographs beforehand, and you will see what each of them answered.</p>
+    <p><strong>Payment.</strong> You receive <strong>HK$60</strong> for taking part. One of your judgements is also drawn at random at the end of the session and decides a prize of <strong>HK$200</strong>; the closer that judgement is to the truth, the better your chance of winning it.</p>
+    <p><strong>No deception.</strong> Nothing in this study is staged. The photographs are of real people whose ages are on record, the two systems are real systems, and the answers you see are the answers they actually gave.</p>
+    <p><strong>Risks and voluntariness.</strong> This is a minimal-risk decision study. Taking part is voluntary and you may stop at any point by telling the experimenter; you will still receive the HK$60.</p>
+    <p><strong>Your data.</strong> We record your judgements, your response times, and the session and seat you were assigned. We do not record your name or any other identifying information. Data are stored securely and reported in aggregate.</p>
+    <p>By continuing you confirm that you are <strong>18 or older</strong>, that you have read the above, and that you agree to take part.</p>
+    <button class="btn-primary" id="btn-consent">I agree — continue</button>
+  </section>
+
+  <section class="screen" id="screen-welcome">
+    <p class="eyebrow">Welcome</p>
+    <h1>Let's get you set up</h1>
+    <div class="callout"><span class="callout-icon">⏱</span><span>Work at your own pace. Nothing in the session is timed.</span></div>
+    <div class="callout"><span class="callout-icon">✋</span><span>Please do not talk to other participants, and leave your phone away for the session.</span></div>
+    <div class="callout"><span class="callout-icon">💰</span><span>HK$60 for taking part, plus one drawn judgement that decides a HK$200 prize.</span></div>
+    <div class="field">
+      <label for="subject-input">Your seat code</label>
+      <input type="text" id="subject-input" autocomplete="off" placeholder="As written on your desk">
+    </div>
+    <p class="field-error" id="subject-error" hidden>Please enter the seat code written on your desk.</p>
+    <button class="btn-primary" id="btn-welcome">Continue</button>
+  </section>
+
+  <section class="screen" id="screen-overview">
+    <p class="eyebrow">What happens</p>
+    <h1>The session in three parts</h1>
+    <div id="overview-body"></div>
+    <button class="btn-primary" id="btn-overview">Continue</button>
+  </section>
+
+  <section class="screen" id="screen-advisors">
+    <p class="eyebrow" id="advisors-eyebrow">Before you start</p>
+    <h1 id="advisors-title">The two systems advising you</h1>
+    <div id="advisors-body"></div>
+    <button class="btn-primary" id="btn-advisors">Continue</button>
+  </section>
+
+  <section class="screen" id="screen-scoring">
+    <p class="eyebrow">How you are paid</p>
+    <h1>Why your honest number is your best number</h1>
+    <div id="scoring-body"></div>
+    <button class="btn-primary" id="btn-scoring">Continue to two practice photographs</button>
+  </section>
+
+  <section class="screen" id="screen-practice-intro">
+    <p class="eyebrow">Practice — not paid</p>
+    <h1>A couple of practice rounds</h1>
+    <div id="practice-intro-body"></div>
+    <button class="btn-primary" id="btn-practice-intro">Start practising</button>
+  </section>
+
+  <section class="screen" id="screen-quiz">
+    <p class="eyebrow">Quick check</p>
+    <h1>Six questions before the real photographs</h1>
+    <details class="review-box"><summary>Show the rules again</summary><div id="quiz-review"></div></details>
+    <div id="quiz-body"></div>
+    <p class="field-error" id="quiz-error" hidden></p>
+    <button class="btn-primary" id="btn-quiz">Check my answers</button>
+  </section>
+
+  <section class="screen" id="screen-return">
+    <p class="eyebrow">Comprehension check</p>
+    <h1>Please speak to the experimenter</h1>
+    <div class="notice">The questions were not answered correctly within three attempts.</div>
+    <p>The paid part of the session cannot begin, but your HK$60 for attending still stands. Please raise your hand and the experimenter will come to you.</p>
+  </section>
+
+  <section class="screen" id="screen-trials-intro">
+    <p class="eyebrow">Starting now</p>
+    <h1>The real photographs</h1>
+    <div id="trials-intro-body"></div>
+    <button class="btn-primary" id="btn-trials-intro">Show me the first photograph</button>
+  </section>
+
+  <section class="screen screen-wide" id="screen-trial">
+    <p class="eyebrow" id="trial-eyebrow"></p>
+    <div class="stagemarks" id="trial-stagemark"></div>
+    <div class="trial-grid">
+      <figure class="photo-frame">
+        <img id="trial-photo" alt="">
+      </figure>
+      <div class="trial-side" id="trial-advisors"></div>
+    </div>
+
+    <h2 class="trial-question" id="trial-question"></h2>
+    <p class="trial-note" id="trial-note"></p>
+    <p class="trial-prior" id="trial-prior" hidden></p>
+
+    <div class="slider-shell">
+      <output class="slider-readout untouched" id="trial-readout" for="trial-slider">—</output>
+      <input type="range" id="trial-slider" class="belief-slider" min="0" max="100" step="1" value="50"
+             aria-label="How likely is it that this person is older than 21, as a percentage">
+      <div class="slider-scale"><span>0 — certainly 21 or younger</span><span>100 — certainly older</span></div>
+    </div>
+
+    <div class="payoff" id="trial-payoff" hidden>
+      <span class="payoff-head">Your chance of winning the prize on this judgement</span>
+      <span class="payoff-pair"><span class="payoff-case">if older than 21</span><strong id="payoff-older">—</strong></span>
+      <span class="payoff-pair"><span class="payoff-case">if 21 or younger</span><strong id="payoff-younger">—</strong></span>
+    </div>
+
+    <p class="field-error" id="trial-error" hidden></p>
+    <button class="btn-primary" id="btn-trial">Continue</button>
+  </section>
+
+  <section class="screen" id="screen-break">
+    <p class="eyebrow">Halfway</p>
+    <h1>A moment to pause</h1>
+    <div id="break-body"></div>
+    <button class="btn-primary" id="btn-break">Carry on</button>
+  </section>
+
+  <section class="screen" id="screen-saving">
+    <p id="saving-msg">Saving your answers…</p>
+  </section>
+
+  <section class="screen" id="screen-payment">
+    <p class="eyebrow">Your payment</p>
+    <h1>The draw</h1>
+    <div id="payment-body"></div>
+    <button class="btn-primary" id="btn-payment">See the answers</button>
+  </section>
+
+  <section class="screen screen-wide" id="screen-debrief">
+    <p class="eyebrow">All done</p>
+    <h1>Thank you — here is what you were working with</h1>
+    <div id="debrief-body"></div>
+  </section>
+
+  <section class="screen" id="screen-error">
+    <p class="eyebrow">One problem</p>
+    <h1>Your answers did not save</h1>
+    <p>Nothing is lost — your answers are still on this screen. Try again, and tell the experimenter if it fails a second time.</p>
+    <p class="audit" id="error-detail" hidden></p>
+    <button class="btn-primary" id="btn-retry">Try again</button>
+  </section>
+
+</main>
+<script src="script.js"></script>
+</body>
+</html>

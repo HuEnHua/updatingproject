@@ -1,0 +1,8 @@
+{
+  "name": "belief-consistency-study-build1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --check script.js && node --check netlify/functions/save.mjs && node test-logic.mjs && node test-static.mjs"
+  }
+}
